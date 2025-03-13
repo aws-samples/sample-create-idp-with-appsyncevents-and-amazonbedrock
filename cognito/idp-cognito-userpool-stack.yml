@@ -1,0 +1,131 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Template to create cognito user pool using email as a required user attribute
+Parameters:
+  UserPoolName:
+    Type: String
+    Description: Name of the User Pool
+    Default: idp-user-pool
+    MinLength: 1
+    MaxLength: 128
+    AllowedPattern: ^[\w\s+=,.@-]+$
+    ConstraintDescription: Must contain only alphanumeric characters and punctuation
+  IdpBucketName:
+    Type: String
+    Description: Name of the S3 bucket where the documents are stored
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Ref UserPoolName
+      AutoVerifiedAttributes:
+        - email
+      EmailVerificationMessage: "Your verification code is {####}."
+      EmailVerificationSubject: "Your verification code"
+      MfaConfiguration: "OPTIONAL"
+      UserAttributeUpdateSettings:
+        AttributesRequireVerificationBeforeUpdate:
+          - email
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      UsernameAttributes:
+        - email
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+      UsernameConfiguration:
+        CaseSensitive: false
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${UserPoolName}-client
+      GenerateSecret: false
+      UserPoolId: !Ref UserPool
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub ${UserPoolName}-domain
+      UserPoolId: !Ref UserPool
+  IdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: !Sub ${UserPoolName}-idp
+      AllowUnauthenticatedIdentities: false
+      CognitoIdentityProviders:
+        - ClientId: !Ref UserPoolClient
+          ProviderName: !GetAtt UserPool.ProviderName
+  IdentityPoolRoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment 
+    Properties: 
+      IdentityPoolId: !Ref IdentityPool
+      Roles: 
+        "authenticated": !GetAtt IdentityPoolAuthenticatedRole.Arn
+  IdentityPoolAuthenticatedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /service-role/
+      RoleName: !Sub ${UserPoolName}-idp-auth-service-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                - "cognito-identity.amazonaws.com"
+            Action: "sts:AssumeRoleWithWebIdentity"
+            Condition:
+              StringEquals:
+                "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
+              ForAnyValue:StringLike:
+                "cognito-identity.amazonaws.com:amr": "authenticated"
+      Policies:
+        - PolicyName: !Sub ${UserPoolName}-idp-auth-service-role-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: "cognito-identity:GetCredentialsForIdentity"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub arn:aws:s3:::${IdpBucketName}/*
+Outputs:
+  UserPoolId:
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub ${AWS::StackName}-UserPoolId
+  UserPoolClientId:
+    Value: !Ref UserPoolClient
+    Export:
+      Name: !Sub ${AWS::StackName}-UserPoolClientId
+  UserPoolDomain:
+    Value: !Ref UserPoolDomain
+  UserPoolArn:
+    Value: !GetAtt UserPool.Arn
+  UserPoolName:
+    Value: !Select
+      - 1
+      - !Split ["/", !GetAtt UserPool.Arn]
+  IdentityPoolId:
+    Value: !Ref IdentityPool
+    Export:
+      Name: !Sub ${AWS::StackName}-IdentityPoolId
+  IdentityPoolAuthenticatedRole:
+    Value: !Ref IdentityPoolAuthenticatedRole
+    Export:
+      Name: !Sub ${AWS::StackName}-IdentityPoolAuthenticatedRole

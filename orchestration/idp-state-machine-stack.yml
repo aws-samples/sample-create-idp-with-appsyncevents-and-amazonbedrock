@@ -1,0 +1,284 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Lambda function to analyze requests with documents via Amazon Bedrock
+Parameters:
+  BedrockLambdaFunctionName:
+    Type: String
+    Description: Name of the Lambda function interacting with Bedrock
+    Default: idp-lambda
+  BedrockLambdaFunctionMemorySize:
+    Type: Number
+    Description: Memory size of the Lambda function interacting with Bedrock
+    Default: 4096
+  BedrockLambdaFunctionRuntime:
+    Type: String
+    Description: Runtime of the Lambda function interacting with Bedrock
+    Default: python3.13
+  BedrockLambdaS3Bucket:
+    Type: String
+    Description: S3 bucket for the Lambda function's code (zip file)
+  BedrockLambdaS3Key:
+    Type: String
+    Description: S3 key for the Lambda function's code (zip file)
+  BedrockModelName:
+    Type: String
+    Description: Bedrock Model Name
+    Default: anthropic.claude-3-sonnet-20240229-v1:0
+  IdpS3Bucket:
+    Type: String
+    Description: S3 bucket where documents are stored
+  AppSyncApi:
+    Type: String
+    Description: Amazon AppSync Api ID
+  AppSyncApiUrl:
+    Type: String
+    Description: Amazon AppSync Api URL
+  AppSyncApiChannel:
+    Type: String
+    Description: Amazon AppSync Api Channel
+    Default: default/channel
+  BdaStackName:
+    Type: String
+    Default: bda-eb-notif-stack
+    Description: Name of the Bda stack
+  BdaLambdaFunctionArnExportName:
+    Type: String
+    Default: BdaLambdaFunctionArn
+    Description: ARN of the Bda Lambda function
+
+Resources:
+  ################### Lambda function resources to interact with Amazon Bedrock #################
+  BedrockLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function interacting with Amazon Bedrock
+      FunctionName: !Ref BedrockLambdaFunctionName
+      Runtime: !Ref BedrockLambdaFunctionRuntime
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt BedrockLambdaFunctionRole.Arn
+      MemorySize: !Ref BedrockLambdaFunctionMemorySize
+      Environment:
+        Variables:
+          BedrockModelName: !Ref BedrockModelName
+          AppSyncApi: !Ref AppSyncApi
+          AppSyncApiUrl: !Ref AppSyncApiUrl
+          AppSyncApiChannel: !Ref AppSyncApiChannel
+      Timeout: 60
+      Code:
+        S3Bucket: !Ref BedrockLambdaS3Bucket
+        S3Key: !Ref BedrockLambdaS3Key
+
+  BedrockLambdaFunctionApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref BedrockLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: states.amazonaws.com
+
+  BedrockLambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaFunctionAppSyncEventsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - appsync:EventPublish
+                Resource: !Sub
+                  - "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApi}/channelNamespace/*"
+                  - AppSyncApi: !Ref AppSyncApi
+        - PolicyName: LambdaFunctionBedrockPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModelWithResponseStream
+                Resource: !Sub
+                  - "arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelName}"
+                  - BedrockModelName: !Ref BedrockModelName
+        - PolicyName: LambdaFunctionLogsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+        - PolicyName: LambdaFunctionS3Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub
+                  - "arn:aws:s3:::${IdpS3Bucket}/*"
+                  - IdpS3Bucket: !Ref IdpS3Bucket                  
+
+  ################### State Machine with 2 states calling the Lambda function
+
+  IdpStepFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - !Sub states.${AWS::Region}.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: IdpStepFunctionPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !GetAtt BedrockLambdaFunction.Arn
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !ImportValue
+                  Fn::Sub: "${BdaStackName}-${BdaLambdaFunctionArnExportName}"
+
+  IdpStepFunction:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      RoleArn: !GetAtt IdpStepFunctionRole.Arn
+      Definition:
+        QueryLanguage: JSONata
+        Comment: An Amazon State Machine to analyze documents with Amazon Bedrock
+        StartAt: IdpBdaStep
+        States:
+          IdpBdaStep:
+            QueryLanguage: JSONata
+            Type: Task
+            Resource: "arn:aws:states:::lambda:invoke"
+            Output: "{% $merge([$states.input, $states.result.Payload]) %}"
+            Arguments:
+              FunctionName: !ImportValue
+                Fn::Sub: "${BdaStackName}-${BdaLambdaFunctionArnExportName}"
+              Payload: "{% $merge([$states.input,{'inputType':'bda'}]) %}"
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+                JitterStrategy: FULL
+            Next: IdpClassificationStep
+          IdpClassificationStep:
+            QueryLanguage: JSONata
+            Type: Task
+            Resource: "arn:aws:states:::lambda:invoke"
+            Output: "{% $merge([$states.input, $states.result.Payload]) %}"
+            Arguments:
+              FunctionName: !GetAtt BedrockLambdaFunction.Arn
+              Payload: "{% $merge([$states.input,{'prompt':'Return 1 of the following classification value to classify the image: Pay Stub, Identification Card or Other (Only include the value in the response)','promptType':'classification'}]) %}"
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+                JitterStrategy: FULL
+            Next: IdpAnalysisStep
+          IdpAnalysisStep:
+            QueryLanguage: JSONata          
+            Type: Task
+            Resource: "arn:aws:states:::lambda:invoke"
+            Output: "{% $states.result.Payload %}"
+            Arguments:
+              FunctionName: !GetAtt BedrockLambdaFunction.Arn
+              Payload: "{% $merge([$states.input,{'prompt':'Describe this image in details','promptType':'analysis'}]) %}"
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+                JitterStrategy: FULL
+            End: true
+
+  ################### EventBridge rule calling Step Functions #########################
+  IdpEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventPattern:
+        source:
+          - "aws.s3"
+        detail-type:
+          - "Object Created"
+        detail:
+          bucket:
+            name:
+              - !Ref IdpS3Bucket
+      Name: IdpEventRule
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt IdpStepFunction.Arn
+          Id: IdpStepFunction
+          RoleArn: !GetAtt IdpEventRuleRole.Arn
+
+  IdpEventRuleRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: IdpEventRulePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
+                Resource: !GetAtt IdpStepFunction.Arn
+
+Outputs:
+  BedrockLambdaFunctionName:
+    Description: Bedrock Lambda Function Name
+    Value: !Ref BedrockLambdaFunctionName
+    Export:
+      Name: !Sub "${AWS::StackName}-BedrockLambdaFunctionNameExportName"
+  BedrockLambdaFunctionArn:
+    Description: Bedrock Lambda Function Arn
+    Value: !GetAtt BedrockLambdaFunction.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-BedrockLambdaFunctionArnExportName"

@@ -1,0 +1,427 @@
+input[type="text"] {
+  background-color: #a97df9;
+  border: none;
+  border-radius: 15px;
+  display: block;
+  margin-right: auto;
+  margin-left: 0px;
+  width: 600px;
+  min-height: 35px;
+  height: 35px;
+  padding: 0.2rem;
+}
+
+textarea {
+  background-color: #a97df9;
+  border: none;
+  border-radius: 15px;
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+  height: 90%;
+  resize: none;
+  width: 90%;
+}
+
+.cameraArea {
+  height: 65%;
+  width: 65%;
+  margin-right: 0%;
+  margin-left: 0%;
+  object-fit: cover;
+}
+
+.hideArea {
+  display: none;
+}
+
+.cameraCanvasArea {
+  height: 65%;
+  width: 65%;
+  margin-right: 0%;
+  margin-left: 15%;
+  object-fit: cover;
+}
+
+.cameraBtnListCanvasArea {
+  display: flex;
+}
+
+.cameraImage {
+  height: 65%;
+  width: 65%;
+  margin-right: auto;
+  margin-left: 0%;
+  object-fit: cover;
+}
+
+Image {
+  overflow: hidden;
+}
+
+.classifierFormArea {
+  margin-left: 0px;
+  margin-right: auto;
+  resize: horizontal;
+  max-width: 600px;
+}
+
+.classifierImageFormArea {
+  margin-left: 5px;
+  margin-right: auto;
+  resize: horizontal;
+  max-width: 50px;
+}
+
+.classifierParentTableArea {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 0px;
+}
+
+.classifierTableArea {
+  display: table;
+  height: 100%;
+  margin-left: 5px;
+  margin-right: 0px;
+  margin-top: 10px;
+  border-collapse: separate;
+  border-spacing: 5px 0px;
+}
+
+.classifierDocList {
+  height: 80px;
+  width: 210px;
+}
+
+.uploadedImageSection {
+  height: 120;
+  width: 210px;
+}
+
+.uploadedImageSection {
+  text-align: center;
+  object-fit: cover;  
+}
+
+.classifierArea {
+  display: table-row;
+  height: 100%;
+  margin-right: auto;
+}
+
+.fileAttachmentButton {
+  background-color: #a97df9;
+  background-image: url('./components/Classifier/fileattach_icon.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 52%;
+  border-radius: 1px;
+  height: 40px;
+  width: 40px;
+  margin-left: 0px;
+  margin-right: 0px;
+  max-width: 40px;
+}
+
+.cameraButton {
+  background-color: #a97df9;
+  background-image: url('./components/Classifier/camera_icon.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  border-radius: 1px;
+  height: 40px;
+  width: 40px;
+  margin-left: 0px;
+  margin-right: 0px;
+  max-width: 40px;
+}
+
+.chatbotImageInputArea {
+  height: 50px;
+  width: 50px;
+  min-height: 50px;
+  min-width: 50px;
+  resize: none;
+}
+
+.chatbotImageUserMessageArea {
+  max-height: 170;
+  max-width: 170px;  
+  text-align: center;
+  resize: none;
+  margin: auto;
+}
+
+.classifierMenuColumnArea {
+  display: flex;
+  resize: none;
+  width: 600px;
+  max-width: 600px;
+  margin-left: 20px;
+  margin-right: auto;
+  margin-top: 10px;
+}
+
+.classifierColumnArea {
+  margin-left: 5px;
+  display: flex;
+}
+
+.classifierTextArea {
+  background-color: #a97df9;
+  border-radius: 15px;
+  margin-bottom: 15px;
+  margin-right: auto;
+  margin-left: 0px;
+  height: 350px;
+  max-height: 350px;
+  width: 600px;
+  max-width: 600px;
+  display: block;
+  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  flex-direction: column-reverse;
+  white-space: pre-line;
+  padding: 2px;
+}
+
+.classifierTextArea::-webkit-scrollbar {
+  width: 15px;
+  background-color: #a97df9;
+  border-radius: 15px;
+  overflow: auto;
+}
+
+.classifierTextArea::-webkit-scrollbar-track {
+  border-radius: 15px;
+}
+
+.classifierTextArea::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  background-color: #8c51f6;
+}
+
+.promptTextArea {
+  background-color: #a97df9;
+  border: none;
+  border-radius: 15px;
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+  height: 100%;
+  resize: none;
+  width: 50%;
+}
+
+.promptResponseArea {
+  background-color: #a97df9;
+  border: none;
+  border-radius: 15px;
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+  height: 100%;
+  resize: none;
+  width: 95%;
+}
+
+.promptResponseArea::-webkit-scrollbar {
+  width: 15px;
+  background-color: #a97df9;
+  border-radius: 15px;
+}
+
+.promptResponseArea::-webkit-scrollbar-track {
+  border-radius: 15px;
+}
+
+.promptResponseArea::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: #8c51f6;
+}
+
+.promptSummaryResponseArea {
+  background-color: #a97df9;
+  border: none;
+  border-radius: 15px;
+  display: block;
+  margin-right: auto;
+  margin-left: 5%;
+  height: 80%;
+  resize: none;
+  width: 50%;
+
+}
+
+.promptSummaryResponseArea::-webkit-scrollbar {
+  width: 15px;
+  background-color: #a97df9;
+  border-radius: 15px;
+}
+
+.promptSummaryResponseArea::-webkit-scrollbar-track {
+  border-radius: 15px;
+}
+
+.promptSummaryResponseArea::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: #8c51f6;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 4rem 18rem 8rem;
+  background-color: #c4a6fb;
+  padding: 5;
+  gap: 25px;
+}
+
+.grid-container>div {
+  background-color: #c4a6fb;
+  text-align: center;
+  padding: 1px 0;
+}
+
+.chatRow {
+  margin: 0;
+  padding: 0;
+  border: none;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.classificationStatusRow {
+  margin: 0;
+  padding: 0;
+  border: none;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.chatIconMessage {
+  margin: 0;
+  resize: none;
+  height: 2%;
+  width: 3%;
+  vertical-align: top
+}
+
+.chatMessage {
+  margin: 0;
+  text-align: left;
+}
+
+.classificationStatusMessage {
+  margin: 0;
+  text-align: left;
+}
+
+.classificationTypeSection, .classifierDocList, .uploadedImageSection {
+  background-color: #a97df9;
+  border-radius: 15px;
+  display: flex;
+  margin-left: 0px;
+  margin-right: auto;
+  resize: none;
+  flex-direction: column;
+  white-space: pre-line;
+  padding: 2px;
+  margin-bottom: 10px;
+}
+
+.classificationTypeSection {
+  height: 40px;
+  width: 210px;
+}
+
+.classificationTypeRow {
+  margin: 0;
+  padding: 0;
+  border: none;
+  margin-right: 0;
+  margin-left: 0;  
+  height: 60px;
+  max-height: 60px;  
+}
+
+.imageRow {
+  margin: 0;
+  padding: 0;
+  border: none;
+  margin-right: 0;
+  margin-left: 0;  
+  height: 100px;
+  max-height: 100px;
+}
+
+.classificationMessage {
+  margin: 0;
+  text-align: center;  
+}
+.classificationTypeMessage {
+  margin: 0;
+  text-align: left;  
+}
+
+.imageMessage {
+  margin: 0;
+  text-align: center;
+}
+
+.chatCollapsibleMessage {
+  margin: 0;
+  text-align: left;
+
+}
+
+.typePromptItem {
+  grid-column-start: 1;
+  grid-column-end: 3;
+}
+
+.promptResponseItem {
+  grid-column-start: 1;
+  grid-column-end: 2;
+  grid-row-start: 2;
+  grid-row-end: 4;
+  margin-left: 30%;
+}
+
+.imagePromptResponseItem {
+  grid-column-start: 2;
+  grid-column-end: 3;
+  grid-row-start: 2;
+  grid-row-end: 3;
+  margin-right: 40%;
+}
+
+.promptSummaryResponseItem {
+  grid-column-start: 2;
+  grid-column-end: 3;
+  grid-row-start: 3;
+  grid-row-end: 4;
+}
+
+input[type="text"]:focus,
+textareafield:focus,
+textarea:focus {
+  outline: none;
+}
+
+body {
+  background: #c4a6fb;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.signOutButton {
+  margin-top: 15px;
+}

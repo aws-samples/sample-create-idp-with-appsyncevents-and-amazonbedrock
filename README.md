@@ -45,13 +45,13 @@ EMAIL_ARG="#replace-with-your-email-address#"
 (cd $CURRENT_DIR/cognito; ./create-cognito-userpool.sh $EMAIL_ARG)
 ```
 
-**Step 4**: Package Lambda Authorizer function code"
+**Step 4**: Package Lambda Authorizer function code
 
 ```bash
 (cd $CURRENT_DIR/appsync/lambda-auth; ../package-lambda-auth.sh)
 ```
 
-**Step 5**: Create AppSync Events API"
+**Step 5**: Create AppSync Events API
 
 ```bash
 (cd $CURRENT_DIR/appsync/; ./create-appsync.sh)

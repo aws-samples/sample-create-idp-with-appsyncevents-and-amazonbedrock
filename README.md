@@ -46,6 +46,8 @@ EMAIL_ARG="#replace-with-your-email-address#"
 (cd $CURRENT_DIR/cognito; ./create-cognito-userpool.sh $EMAIL_ARG)
 ```
 
+**Important note:** This step will also create a user in your user pool, you should receive an email with a temporary password in this format: "“"Your username is #your-email-address# and temporary password is #temporary-password#.". Keep note of your login details (email address and temporary password) as this will be used later when testing the web application.
+
 **Step 4**: Package Lambda Authorizer function code
 
 ```bash
@@ -93,6 +95,13 @@ aws s3api put-bucket-notification-configuration --bucket $BDA_BUCKET_NAME --noti
 ```bash
 (cd $CURRENT_DIR/amplify/amplify-idp; ./deploy.sh)
 ```
+
+Once the solution is deployed:
+* Open the AWS Amplify App **URL** in your navigator
+* Login with your **email address** and **temporary password** (you should have recorded these details in **Step 3**)
+* Once done, when prompted, enter a **new password** and choose **Change Password**
+* You should now be able to see a **chat interface**, to **upload a document** (or **capture a picture** from your camera)
+* Once done, you should see a **summary** of the document along with a **classification** and **specific fields extracted**
 
 ## Security
 

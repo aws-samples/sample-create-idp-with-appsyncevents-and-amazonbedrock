@@ -1,4 +1,4 @@
-##  Create real-time Intelligent document processing solution using AWS AppSync Events, AWS Step Functions and Amazon Bedrock Data Automation
+##  Create a real-time Intelligent document processing solution using AWS AppSync Events, AWS Step Functions and Amazon Bedrock Data Automation
 
 This repository contains samples to provision an intelligent document processing solution with a web application used to upload documents for processing.
 

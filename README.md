@@ -66,10 +66,32 @@ EMAIL_ARG="#replace-with-your-email-address#"
 
 **Step 7**: Enable EventBridge notification on Bedrock Data Automation's S3 bucket (Set the **BDA_BUCKET_NAME** variable to your Bedrock Data Automation's S3 bucket name)
 
+```bash
 # TODO: Set the BDA_BUCKET_NAME variable to your Bedrock Data Automation's S3 bucket name
 BDA_BUCKET_NAME="#replace-with-bda-s3-bucket-name"
 aws s3api put-bucket-notification-configuration --bucket $BDA_BUCKET_NAME --notification-configuration='{ "EventBridgeConfiguration": {} }'
+```
 
+**Step 8**: Create Step Functions state machine and Lambda functions
+
+```bash
+(cd $CURRENT_DIR/orchestration/bda; ./create-bda-lambda.sh $BDA_BUCKET_NAME)
+(cd $CURRENT_DIR/orchestration/; ./create-state-machine.sh)
+```
+
+**Step 9**: Setup Amplify to deploy the web application
+
+```bash
+(cd $CURRENT_DIR/amplify/; ./create-amplify-project.sh)
+(cd $CURRENT_DIR/amplify/; ./create-amplify-app.sh)
+(cd $CURRENT_DIR/s3; ./create-amplifyapp-s3-bucket.sh)
+```
+
+**Step 10**: Deploy the web application
+
+```bash
+(cd $CURRENT_DIR/amplify/amplify-idp; ./deploy.sh)
+```
 
 ## Security
 

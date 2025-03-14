@@ -43,7 +43,8 @@ export CURRENT_DIR=$(pwd)
 ```bash
 # TODO: Set the EMAIL_ARG variable to your email address 
 EMAIL_ARG="#replace-with-your-email-address#"
-(cd $CURRENT_DIR/cognito; ./create-cognito-userpool.sh $EMAIL_ARG)
+(cd $CURRENT_DIR/cognito; ./create-cognito-userpool.sh)
+(cd $CURRENT_DIR/cognito; ./create-cognito-testuser.sh $EMAIL_ARG)
 ```
 
 **Important note:** This step will also create a user in your user pool, you should receive an email with a temporary password in this format: "“"Your username is #your-email-address# and temporary password is #temporary-password#.". Keep note of your login details (email address and temporary password) as this will be used later when testing the web application.

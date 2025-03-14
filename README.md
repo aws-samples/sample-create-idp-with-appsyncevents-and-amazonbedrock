@@ -37,7 +37,7 @@ export CURRENT_DIR=$(pwd)
 (cd $CURRENT_DIR/s3; ./create-appsync-authlambda-s3-bucket.sh)
 ```
 
-**Step 3**: Create Cognito user pool & identity pool (set the EMAIL_ARG variable to your email address)
+**Step 3**: Create Cognito user pool & identity pool (set the **EMAIL_ARG** variable to your email address)
 
 ```bash
 # TODO: Set the EMAIL_ARG variable to your email address 
@@ -64,7 +64,7 @@ EMAIL_ARG="#replace-with-your-email-address#"
 (cd $CURRENT_DIR/orchestration/bda/lambda; ../package-bda-lambda.sh)
 ```
 
-**Step 7**: Enable EventBridge notification on Bedrock Data Automation's S3 bucket (Set the BDA_BUCKET_NAME variable to your Bedrock Data Automation's S3 bucket name)
+**Step 7**: Enable EventBridge notification on Bedrock Data Automation's S3 bucket (Set the **BDA_BUCKET_NAME** variable to your Bedrock Data Automation's S3 bucket name)
 
 # TODO: Set the BDA_BUCKET_NAME variable to your Bedrock Data Automation's S3 bucket name
 BDA_BUCKET_NAME="#replace-with-bda-s3-bucket-name"

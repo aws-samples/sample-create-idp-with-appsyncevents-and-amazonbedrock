@@ -5,10 +5,10 @@ echo "Enable execution on shell script files"
 find . -name '*.sh' -exec chmod +x {} +
 
 echo "Step 1. Create S3 bucket for IdP documents"
-(cd $CURRENT_DIR/s3; ./s3/create-idp-s3-bucket.sh)
+(cd $CURRENT_DIR/s3; ./create-idp-s3-bucket.sh)
 
 echo "Step 2. Create S3 bucket for Lambda function"
-(cd $CURRENT_DIR/s3; ./s3/create-lambda-s3-bucket.sh)
+(cd $CURRENT_DIR/s3; ./create-lambda-s3-bucket.sh)
 
 echo "Step 3. Create S3 bucket for AppSync Auth Lambda function"
 (cd $CURRENT_DIR/s3; ./create-appsync-authlambda-s3-bucket.sh)

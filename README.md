@@ -33,8 +33,8 @@ find . -name '*.sh' -exec chmod +x {} +
 
 ```bash
 export CURRENT_DIR=$(pwd)
-(cd $CURRENT_DIR/s3; ./s3/create-idp-s3-bucket.sh)
-(cd $CURRENT_DIR/s3; ./s3/create-lambda-s3-bucket.sh)
+(cd $CURRENT_DIR/s3; ./create-idp-s3-bucket.sh)
+(cd $CURRENT_DIR/s3; ./create-lambda-s3-bucket.sh)
 (cd $CURRENT_DIR/s3; ./create-appsync-authlambda-s3-bucket.sh)
 ```
 

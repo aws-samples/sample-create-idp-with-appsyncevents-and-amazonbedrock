@@ -16,6 +16,7 @@ To follow along and set up this solution, you must have the following:
     * Python 3.12 installed
     * Node.js 20.12.0 installed
     * [The AWS Amplify CLI set up](http://docs.amplify.aws/react/start/manual-installation/)
+* Setup Bedrock Data Automation by creating a project and set of blueprints following this [guide](https://docs.aws.amazon.com/bedrock/latest/userguide/bda-blueprints-console.html)
 
 **Deployment steps**
 

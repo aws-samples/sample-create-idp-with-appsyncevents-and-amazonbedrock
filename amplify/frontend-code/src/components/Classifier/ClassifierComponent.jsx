@@ -304,6 +304,8 @@ const ClassifierComponent = (props) => {
               var messageStatus = dataEvent.messageStatus
               if(messageStatusType == "analysis") {
                 setDocAnalysisStatus(messageStatus)
+              } else if (messageStatusType == "bda") {
+                setDocClassificationStatus(messageStatus)
               }
             }
             else if(messageType == "analysis") {
@@ -330,7 +332,6 @@ const ClassifierComponent = (props) => {
                 }
                 setBdaMessage(bdaMessage)
                 setClassificationMessage((classificationMessage) => [...classificationMessage, docClassificationMessageChunkObject])
-                setDocClassificationStatus("Completed")
               }
             }
           },

@@ -19,4 +19,4 @@ aws s3 cp $zip_file_name s3://$IDP_LAMBDA_BUCKET_NAME
 echo 'export LAMBDA_AUTH_PACKAGE_NAME="'$zip_file_name'"' >> ~/.bashrc
 echo "Lambda auth package name created: $zip_file_name"
 
-bash
+source ~/.bashrc

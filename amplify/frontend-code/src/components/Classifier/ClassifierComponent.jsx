@@ -286,8 +286,6 @@ const ClassifierComponent = (props) => {
   }
 
   useEffect(() => {
-    //const currentChatArea = chatArea.current;
-    //currentChatArea.scrollTop = currentChatArea.scrollHeight;
     const refreshBoard = async () => {
       if (!room || !room.length) {
         return
@@ -307,20 +305,6 @@ const ClassifierComponent = (props) => {
               if(messageStatusType == "analysis") {
                 setDocAnalysisStatus(messageStatus)
               }
-              else if(messageStatusType == "classification") {
-                setDocClassificationStatus(messageStatus)
-              }
-            }
-            else if(messageType == "classification") {
-              var docClassificationMessageChunk = dataEvent.messageChunk
-              var docClassificationMessageChunkIndex = dataEvent.messageChunkIndex
-              var docClassificationMessageChunkObject = {
-                index: docClassificationMessageChunkIndex,
-                chunk: docClassificationMessageChunk
-              }
-              console.log(`docClassificationMessageChunkObject: ${JSON.stringify(docClassificationMessageChunkObject)}`)
-              setLastMessageId(currentMessageId)
-              setClassificationMessage((classificationMessage) => [...classificationMessage, docClassificationMessageChunkObject])
             }
             else if(messageType == "analysis") {
               var docAnalysisMessageChunk = dataEvent.messageChunk
@@ -338,7 +322,15 @@ const ClassifierComponent = (props) => {
               var messageStatusType = dataEvent.messageStatusType
               if(messageStatusType != "status"){
                 console.log(`bdaMessage: ${JSON.stringify(bdaMessage)}`)
+                var docClassificationMessageChunk = bdaMessage.document_class.type
+                var docClassificationMessageChunkIndex = 0
+                var docClassificationMessageChunkObject = {
+                  index: docClassificationMessageChunkIndex,
+                  chunk: docClassificationMessageChunk
+                }
                 setBdaMessage(bdaMessage)
+                setClassificationMessage((classificationMessage) => [...classificationMessage, docClassificationMessageChunkObject])
+                setDocClassificationStatus("Completed")
               }
             }
           },

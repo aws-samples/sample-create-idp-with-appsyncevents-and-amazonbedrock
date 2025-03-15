@@ -17,6 +17,7 @@ To follow along and set up this solution, you must have the following:
     * Node.js 20.12.0 installed
     * [The AWS Amplify CLI set up](http://docs.amplify.aws/react/start/manual-installation/)
 * Setup Bedrock Data Automation by creating a project and set of blueprints following this [guide](https://docs.aws.amazon.com/bedrock/latest/userguide/bda-blueprints-console.html)
+* Enable [Model Access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) to the Claude 3 Sonnet model in Amazon Bedrock
 
 **Deployment steps**
 

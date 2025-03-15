@@ -304,8 +304,6 @@ const ClassifierComponent = (props) => {
               var messageStatus = dataEvent.messageStatus
               if(messageStatusType == "analysis") {
                 setDocAnalysisStatus(messageStatus)
-              } else if (messageStatusType == "bda") {
-                setDocClassificationStatus(messageStatus)
               }
             }
             else if(messageType == "analysis") {
@@ -322,6 +320,7 @@ const ClassifierComponent = (props) => {
             else if(messageType == "bda") {
               var bdaMessage = dataEvent.messageBody
               var messageStatusType = dataEvent.messageStatusType
+              var messageStatus = dataEvent.messageStatus
               if(messageStatusType != "status"){
                 console.log(`bdaMessage: ${JSON.stringify(bdaMessage)}`)
                 var docClassificationMessageChunk = bdaMessage.document_class.type
@@ -332,6 +331,8 @@ const ClassifierComponent = (props) => {
                 }
                 setBdaMessage(bdaMessage)
                 setClassificationMessage((classificationMessage) => [...classificationMessage, docClassificationMessageChunkObject])
+              } else {
+                setDocClassificationStatus(messageStatus)
               }
             }
           },

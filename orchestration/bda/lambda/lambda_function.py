@@ -24,6 +24,7 @@ endpoint = "/event"
 region = os.environ["AWS_REGION"]
 request_url = f"https://{host}{endpoint}"
 bda_s3bucket = os.environ["BdaS3Bucket"]
+bda_profile_arn = os.environ["DataAutomationProfileArn"]
 
 def call_websocket_endpoint(url, data):
     request = json.dumps({"channel": channel, "events": [json.dumps(data)]})
@@ -94,9 +95,10 @@ def start_bda_automation(bda_s3bucket, key):
             's3Uri': s3OutputUri
         },
         dataAutomationConfiguration={
-            'dataAutomationArn': data_automation_arn,
+            'dataAutomationProjectArn': data_automation_arn,
             'stage': data_automation_stage
-        }
+        },
+        dataAutomationProfileArn=bda_profile_arn
     )
     return response
 

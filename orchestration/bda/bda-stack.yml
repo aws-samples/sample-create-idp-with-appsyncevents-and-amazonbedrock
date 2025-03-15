@@ -36,6 +36,10 @@ Parameters:
     Type: String
     Description: Amazon AppSync Api Channel
     Default: default/channel
+  DataAutomationProfile:
+    Type: String
+    Description: Data Automation Profile
+    Default: us.data-automation-v1
 
 Resources:
   ################### Lambda function resources to interact with Amazon Bedrock Data Automation #################
@@ -145,6 +149,9 @@ Resources:
           AppSyncApiUrl: !Ref AppSyncApiUrl
           AppSyncApiChannel: !Ref AppSyncApiChannel
           BdaS3Bucket: !Ref BdaS3Bucket
+          DataAutomationProfileArn: !Sub
+            - "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:data-automation-profile/${DataAutomationProfile}"
+            - DataAutomationProfile: !Ref DataAutomationProfile
       Timeout: 60
       Code:
         S3Bucket: !Ref BedrockLambdaS3Bucket

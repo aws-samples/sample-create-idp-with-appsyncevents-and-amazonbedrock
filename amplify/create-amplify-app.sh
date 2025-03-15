@@ -15,4 +15,4 @@ echo 'export AMPLIFY_APP_ID="'$AMPLIFY_APP_ID'"' >> ~/.bashrc
 echo "AMPLIFY_APP_ID: $AMPLIFY_APP_ID"
 echo 'export AMPLIFY_BRANCH_NAME="'$AMPLIFY_BRANCH_NAME'"' >> ~/.bashrc
 echo "AMPLIFY_BRANCH_NAME: $AMPLIFY_BRANCH_NAME"
-bash
+source ~/.bashrc

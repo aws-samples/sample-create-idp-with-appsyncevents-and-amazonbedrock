@@ -18,4 +18,4 @@ aws s3 cp $zip_file_name s3://$IDP_LAMBDA_BUCKET_NAME
 # Save environment variable
 echo 'export LAMBDA_PACKAGE_NAME="'$zip_file_name'"' >> ~/.bashrc
 echo "Lambda package name created: $zip_file_name"
-bashsource ~/.bashrc
+source ~/.bashrc

@@ -13,7 +13,34 @@ Parameters:
   IdpBucketName:
     Type: String
     Description: Name of the S3 bucket where the documents are stored
+  SnsTopicName:
+    Type: String
+    Description: Name of the SNS topic for MFA notification
+    Default: idp-cognito-sns-topic
 Resources:
+  SnsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - cognito-idp.amazonaws.com
+            Action:
+              - sts:AssumeRole
+            Condition:
+              StringEquals:
+                'sts:ExternalId': !Sub ${AWS::StackName}
+      Policies:
+        - PolicyName: SnsPublishPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: sns:Publish
+                Resource: "*"
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -23,6 +50,11 @@ Resources:
       EmailVerificationMessage: "Your verification code is {####}."
       EmailVerificationSubject: "Your verification code"
       MfaConfiguration: "OPTIONAL"
+      SmsConfiguration:
+        ExternalId: !Sub ${AWS::StackName}
+        SnsCallerArn: !GetAtt SnsRole.Arn
+        SnsRegion: !Ref AWS::Region
+      SmsVerificationMessage: "Your verification code is {####}."
       UserAttributeUpdateSettings:
         AttributesRequireVerificationBeforeUpdate:
           - email
@@ -53,11 +85,6 @@ Resources:
     Properties:
       ClientName: !Sub ${UserPoolName}-client
       GenerateSecret: false
-      UserPoolId: !Ref UserPool
-  UserPoolDomain:
-    Type: AWS::Cognito::UserPoolDomain
-    Properties:
-      Domain: !Sub ${UserPoolName}-domain
       UserPoolId: !Ref UserPool
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
@@ -113,8 +140,6 @@ Outputs:
     Value: !Ref UserPoolClient
     Export:
       Name: !Sub ${AWS::StackName}-UserPoolClientId
-  UserPoolDomain:
-    Value: !Ref UserPoolDomain
   UserPoolArn:
     Value: !GetAtt UserPool.Arn
   UserPoolName:

@@ -30,5 +30,4 @@ bda_project_arn=$(echo "$bda_response" | jq -r '.projectArn')
 # Save environment variable
 echo 'export BDA_PROJECT_ARN="'$bda_project_arn'"' >> ~/.bashrc
 echo "BDA project created: $bda_project_arn"
-
 source ~/.bashrc

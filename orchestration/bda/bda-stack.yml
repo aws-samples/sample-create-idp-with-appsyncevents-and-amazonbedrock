@@ -133,7 +133,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - bedrock:ListDataAutomationProjects
+                  - bedrock:GetDataAutomationProject
                   - bedrock:InvokeDataAutomationAsync
                 Resource: "*"
 

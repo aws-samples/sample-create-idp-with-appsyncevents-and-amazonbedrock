@@ -1,3 +1,6 @@
+#!/bin/bash
+source $HOME/.bashrc
+
 # Retrieve S3 bucket for Lambda zip package
 s3_lambdacode_bucket_stack_name="idp-lambda-s3-bucket-stack"
 IDP_LAMBDA_BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name "$s3_lambdacode_bucket_stack_name" --query 'Stacks[0].Outputs[?OutputKey==`S3IdpLambdaBucket`].OutputValue' --output text)

@@ -1,3 +1,6 @@
+#!/bin/bash
+source $HOME/.bashrc
+
 appsync_events_stack_name="idp-appsync-stack"
 
 APPSYNC_API=$(aws cloudformation describe-stacks --stack-name "$appsync_events_stack_name" --query 'Stacks[0].Outputs[?OutputKey==`AppSyncEventsApiId`].OutputValue' --output text)

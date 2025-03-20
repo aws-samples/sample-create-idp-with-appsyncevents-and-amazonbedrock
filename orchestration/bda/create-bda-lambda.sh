@@ -1,3 +1,5 @@
+#!/bin/bash
+source $HOME/.bashrc
 bda_eb_notif_stack_name="bda-eb-notif-stack"
 
 # Retrieve S3 bucket for Lambda zip package
@@ -28,4 +30,4 @@ aws cloudformation create-stack \
         ParameterKey=AppSyncApi,ParameterValue=$APPSYNC_API \
         ParameterKey=AppSyncApiUrl,ParameterValue=$APPSYNC_API_URL \
         ParameterKey=DataAutomationProjectArn,ParameterValue=$BDA_PROJECT_ARN
-aws cloudformation wait stack-create-complete --stack-name "$bda_eb_notif_stack_name"aws cloudformation create-stack \
+aws cloudformation wait stack-create-complete --stack-name "$bda_eb_notif_stack_name"

@@ -34,7 +34,7 @@ find . -name '*.sh' -exec chmod +x {} +
 **Step 2**: Setup Bedrock Data Automation project & sample blueprint
 
 ```bash
-./setup-bda-project.sh
+(./setup-bda-project.sh)
 ```
 
 **Step 3**: Create S3 buckets to upload IdP documents and code files of Lambda functions

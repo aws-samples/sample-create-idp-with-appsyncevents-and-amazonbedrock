@@ -82,7 +82,7 @@ EMAIL_ARG="#replace-with-your-email-address#"
 # TODO: Set the BDA_BUCKET_NAME variable to your Bedrock Data Automation's S3 bucket name
 # You can find the Bedrock Data Automation's S3 bucket name by either:
 # Option 1: Browsing S3 buckets starting with the prefix "bedrock-bda-$AWS_REGION-": aws s3 ls --bucket-name-prefix "bedrock-bda-$AWS_REGION-"
-# Option 2: Get the first S3 bucket start with the prefix "bedrock-bda-$AWS_REGION-": aws s3 ls --bucket-name-prefix "bedrock-bda-$AWS_REGION-" | grep -v logging | head -n 1 | awk '{print $3}'
+# Option 2: Get the first S3 bucket starting with the prefix "bedrock-bda-$AWS_REGION-": aws s3 ls --bucket-name-prefix "bedrock-bda-$AWS_REGION-" | grep -v logging | head -n 1 | awk '{print $3}'
 BDA_BUCKET_NAME="#replace-with-bda-s3-bucket-name#"
 aws s3api put-bucket-notification-configuration --bucket $BDA_BUCKET_NAME --notification-configuration='{ "EventBridgeConfiguration": {} }'
 ```

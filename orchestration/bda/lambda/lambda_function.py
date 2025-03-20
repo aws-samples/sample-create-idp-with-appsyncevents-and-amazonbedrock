@@ -25,6 +25,7 @@ region = os.environ["AWS_REGION"]
 request_url = f"https://{host}{endpoint}"
 bda_s3bucket = os.environ["BdaS3Bucket"]
 bda_profile_arn = os.environ["DataAutomationProfileArn"]
+bda_project_arn = os.environ["DataAutomationProjectArn"]
 
 def call_websocket_endpoint(url, data):
     request = json.dumps({"channel": channel, "events": [json.dumps(data)]})
@@ -79,11 +80,10 @@ def start_bda_automation(bda_s3bucket, key):
     s3InputUri = f"{s3Uri}/{key}"
     s3OutputUri = f"{s3Uri}/inference_results"
 
-    data_automation_projects = bda.list_data_automation_projects()
-    logger.info(f"data_automation_projects: {data_automation_projects}")
-    data_automation_arn = data_automation_projects['projects'][0]['projectArn']
-    data_automation_stage = data_automation_projects['projects'][0]['projectStage']
-    logger.info(f"data_automation_arn: {data_automation_arn} / data_automation_stage: {data_automation_stage}")
+    data_automation_project = bda.get_data_automation_project(projectArn=bda_project_arn)
+    logger.info(f"data_automation_projects {data_automation_project}")
+    data_automation_stage = data_automation_project['project']['projectStage']
+    logger.info(f"data_automation_arn: {bda_project_arn} / data_automation_stage: {data_automation_stage}")
 
     logger.info(f"s3InputUri: {s3InputUri} / s3OutputUri: {s3OutputUri}")
 
@@ -95,7 +95,7 @@ def start_bda_automation(bda_s3bucket, key):
             's3Uri': s3OutputUri
         },
         dataAutomationConfiguration={
-            'dataAutomationProjectArn': data_automation_arn,
+            'dataAutomationProjectArn': bda_project_arn,
             'stage': data_automation_stage
         },
         dataAutomationProfileArn=bda_profile_arn

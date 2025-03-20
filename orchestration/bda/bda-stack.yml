@@ -40,6 +40,9 @@ Parameters:
     Type: String
     Description: Data Automation Profile
     Default: us.data-automation-v1
+  DataAutomationProjectArn:
+    Type: String
+    Description: Data Automation Project ARN
 
 Resources:
   ################### Lambda function resources to interact with Amazon Bedrock Data Automation #################
@@ -152,6 +155,7 @@ Resources:
           DataAutomationProfileArn: !Sub
             - "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:data-automation-profile/${DataAutomationProfile}"
             - DataAutomationProfile: !Ref DataAutomationProfile
+          DataAutomationProjectArn: !Ref DataAutomationProjectArn
       Timeout: 60
       Code:
         S3Bucket: !Ref BedrockLambdaS3Bucket

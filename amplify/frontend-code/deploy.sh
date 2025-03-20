@@ -22,5 +22,5 @@ aws s3 cp "$AMPLIFY_PROJECT_PACKAGE" s3://$AMPLIFY_BUCKET_NAME \
 aws amplify start-deployment --app-id "$AMPLIFY_APP_ID" --branch-name "$AMPLIFY_BRANCH_NAME" --source-url "s3://$AMPLIFY_BUCKET_NAME/$AMPLIFY_PROJECT_PACKAGE"
 
 # Echo Amplify App URL
-AMPLIFY_APP_DOMAIN=$(aws amplify get-app --app-id "d16e30iehg8xtt" --query "app.defaultDomain" --output text)
+AMPLIFY_APP_DOMAIN=$(aws amplify get-app --app-id "$AMPLIFY_APP_ID" --query "app.defaultDomain" --output text)
 echo "Amplify URL: https://$AMPLIFY_BRANCH_NAME.$AMPLIFY_APP_DOMAIN"

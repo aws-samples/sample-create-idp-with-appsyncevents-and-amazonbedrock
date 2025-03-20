@@ -16,8 +16,9 @@ To follow along and set up this solution, you must have the following:
     * Python 3.12 installed
     * Node.js 20.12.0 installed
     * [The AWS Amplify CLI set up](http://docs.amplify.aws/react/start/manual-installation/)
-* Setup Bedrock Data Automation by creating a project and set of blueprints following this [guide](https://docs.aws.amazon.com/bedrock/latest/userguide/bda-blueprints-console.html)
+    * [Latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions)
 * Enable [Model Access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) to the Claude 3 Sonnet model in Amazon Bedrock
+
 
 **Deployment steps**
 
@@ -30,7 +31,13 @@ echo "Enable execution on shell script files"
 find . -name '*.sh' -exec chmod +x {} +
 ```
 
-**Step 2**: Create S3 buckets to upload IdP documents and code files of Lambda functions
+**Step 2**: Setup Bedrock Data Automation project & sample blueprint
+
+```bash
+./setup-bda-project.sh
+```
+
+**Step 3**: Create S3 buckets to upload IdP documents and code files of Lambda functions
 
 ```bash
 export CURRENT_DIR=$(pwd)
@@ -39,7 +46,7 @@ export CURRENT_DIR=$(pwd)
 (cd $CURRENT_DIR/s3; ./create-appsync-authlambda-s3-bucket.sh)
 ```
 
-**Step 3**: Create Cognito user pool & identity pool (set the **EMAIL_ARG** variable to your email address)
+**Step 4**: Create Cognito user pool & identity pool (set the **EMAIL_ARG** variable to your email address)
 
 ```bash
 # TODO: Set the EMAIL_ARG variable to your email address 
@@ -50,26 +57,26 @@ EMAIL_ARG="#replace-with-your-email-address#"
 
 **Important note:** This step will also create a user in your user pool, you should receive an email with a temporary password in this format: "Your username is **#your-email-address#** and temporary password is **#temporary-password#**.". Keep note of your login details (email address and temporary password) as this will be used later when testing the web application.
 
-**Step 4**: Package Lambda Authorizer function code
+**Step 5**: Package Lambda Authorizer function code
 
 ```bash
 (cd $CURRENT_DIR/appsync/lambda-auth; ../package-lambda-auth.sh)
 ```
 
-**Step 5**: Create AppSync Events API
+**Step 6**: Create AppSync Events API
 
 ```bash
 (cd $CURRENT_DIR/appsync/; ./create-appsync.sh)
 ```
 
-**Step 6**: Package Lambda functions (functions used in Step Functions state machine and function used for Bedrock Data Automation)
+**Step 7**: Package Lambda functions (functions used in Step Functions state machine and function used for Bedrock Data Automation)
 
 ```bash
 (cd $CURRENT_DIR/orchestration/lambda; ../package-lambda.sh)
 (cd $CURRENT_DIR/orchestration/bda/lambda; ../package-bda-lambda.sh)
 ```
 
-**Step 7**: Enable EventBridge notification on Bedrock Data Automation's S3 bucket (Set the **BDA_BUCKET_NAME** variable to your Bedrock Data Automation's S3 bucket name)
+**Step 8**: Enable EventBridge notification on Bedrock Data Automation's S3 bucket (Set the **BDA_BUCKET_NAME** variable to your Bedrock Data Automation's S3 bucket name)
 
 ```bash
 # TODO: Set the BDA_BUCKET_NAME variable to your Bedrock Data Automation's S3 bucket name
@@ -77,14 +84,14 @@ BDA_BUCKET_NAME="#replace-with-bda-s3-bucket-name"
 aws s3api put-bucket-notification-configuration --bucket $BDA_BUCKET_NAME --notification-configuration='{ "EventBridgeConfiguration": {} }'
 ```
 
-**Step 8**: Create Step Functions state machine and Lambda functions
+**Step 9**: Create Step Functions state machine and Lambda functions
 
 ```bash
 (cd $CURRENT_DIR/orchestration/bda; ./create-bda-lambda.sh $BDA_BUCKET_NAME)
 (cd $CURRENT_DIR/orchestration/; ./create-state-machine.sh)
 ```
 
-**Step 9**: Setup Amplify to deploy the web application
+**Step 10**: Setup Amplify to deploy the web application
 
 ```bash
 (cd $CURRENT_DIR/amplify/; ./create-amplify-project.sh)
@@ -92,7 +99,7 @@ aws s3api put-bucket-notification-configuration --bucket $BDA_BUCKET_NAME --noti
 (cd $CURRENT_DIR/s3; ./create-amplifyapp-s3-bucket.sh)
 ```
 
-**Step 10**: Deploy the web application
+**Step 11**: Deploy the web application
 
 ```bash
 (cd $CURRENT_DIR/amplify/amplify-idp; ./deploy.sh)
@@ -112,4 +119,3 @@ See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more inform
 ## License
 
 This library is licensed under the MIT-0 License. See the LICENSE file.
-

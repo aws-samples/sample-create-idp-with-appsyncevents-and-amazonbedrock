@@ -46,7 +46,8 @@ export class BedrockAdapter extends LLMAdapter {
     };
   }
   async buildRestResponse(rawResponse) {
-    var systemMessageSources = "sourceAttributions" in rawResponse ? rawResponse.sourceAttributions : [];
+    var systemMessageSources =
+      "sourceAttributions" in rawResponse ? rawResponse.sourceAttributions : [];
     var systemMessageImage = "image" in rawResponse ? rawResponse.image : "";
     console.log(rawResponse);
     var systemMessageSourceArray = await this.buildMessageSourceArray(

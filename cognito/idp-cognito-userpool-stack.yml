@@ -32,7 +32,7 @@ Resources:
               - sts:AssumeRole
             Condition:
               StringEquals:
-                'sts:ExternalId': !Sub ${AWS::StackName}
+                "sts:ExternalId": !Sub ${AWS::StackName}
       Policies:
         - PolicyName: SnsPublishPolicy
           PolicyDocument:
@@ -95,10 +95,10 @@ Resources:
         - ClientId: !Ref UserPoolClient
           ProviderName: !GetAtt UserPool.ProviderName
   IdentityPoolRoleAttachment:
-    Type: AWS::Cognito::IdentityPoolRoleAttachment 
-    Properties: 
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
       IdentityPoolId: !Ref IdentityPool
-      Roles: 
+      Roles:
         "authenticated": !GetAtt IdentityPoolAuthenticatedRole.Arn
   IdentityPoolAuthenticatedRole:
     Type: AWS::IAM::Role

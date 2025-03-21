@@ -4,29 +4,28 @@ import { bedrockAdapter } from "../Utils/LLMAdapter";
 
 import React, { useEffect, useState, useRef } from "react";
 import { getCurrentUser } from "aws-amplify/auth";
-import { events } from 'aws-amplify/data';
+import { events } from "aws-amplify/data";
 
 import chatbotIcon from "./chatbot_icon.png";
 import CameraComponent from "./CameraComponent";
 
-import { fetchAuthToken } from "../Utils/Auth"
-import { uploadData } from 'aws-amplify/storage';
-import { StorageImage } from '@aws-amplify/ui-react-storage';
-import { Buffer } from 'buffer'
-
+import { fetchAuthToken } from "../Utils/Auth";
+import { uploadData } from "aws-amplify/storage";
+import { StorageImage } from "@aws-amplify/ui-react-storage";
+import { Buffer } from "buffer";
 
 const ClassifierComponent = (props) => {
   const { tokens } = useTheme();
-  const [lastMessageId, setLastMessageId] = useState()
-  const [lastMessage, setLastMessage] = useState("")
-  const [bdaMessage, setBdaMessage] = useState("")
-  const [messages, setMessages] = useState([])
-  const [classificationMessage, setClassificationMessage] = useState([])
+  const [lastMessageId, setLastMessageId] = useState();
+  const [lastMessage, setLastMessage] = useState("");
+  const [bdaMessage, setBdaMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [classificationMessage, setClassificationMessage] = useState([]);
 
-  const [room, setRoom] = useState('channel')
-  const counterRef = useRef(null)
+  const [room, setRoom] = useState("channel");
+  const counterRef = useRef(null);
   const [uploadedImage, setUploadedImage] = React.useState();
-  const acceptedFileTypes = ['image/png', 'image/jpeg'];
+  const acceptedFileTypes = ["image/png", "image/jpeg"];
 
   const [cameraButton] = useState(true);
   const [cameraImage, setCameraImage] = useState();
@@ -46,11 +45,12 @@ const ClassifierComponent = (props) => {
   );
 
   const [docUploadStatus, setDocUploadStatus] = useState("-");
-  const [docClassificationStatus, setDocClassificationStatus] = useState("-")
-  const [docAnalysisStatus, setDocAnalysisStatus] = useState("-")
+  const [docClassificationStatus, setDocClassificationStatus] = useState("-");
+  const [docAnalysisStatus, setDocAnalysisStatus] = useState("-");
   const [classificationState, setClassificationState] = useState(<></>);
 
-  const initialAssistantMessage = "Please upload your file. Once done, I will share my analysis here.";
+  const initialAssistantMessage =
+    "Please upload your file. Once done, I will share my analysis here.";
   const [chatState, setChatState] = useState(
     chatAssistantMessageRow(initialAssistantMessage)
   );
@@ -67,7 +67,7 @@ const ClassifierComponent = (props) => {
     restApiAdapter.configure(llmOption);
     return restApiAdapter;
   }
-  
+
   function resetState() {
     setDocUploadStatus("-");
     setDocAnalysisStatus("-");
@@ -83,7 +83,11 @@ const ClassifierComponent = (props) => {
       return;
     }
     const image = files[0];
-    const result = await uploadDocument(`documents/${image.name}`, image, false)
+    const result = await uploadDocument(
+      `documents/${image.name}`,
+      image,
+      false
+    );
   };
 
   function chatAssistantMessageSourceRow(assistantMessageSources) {
@@ -124,28 +128,38 @@ const ClassifierComponent = (props) => {
     if (!assistantMessageImage) return;
     var sourceImage = `data:image/png;base64,${assistantMessageImage}`;
     return (
-      <img id="cameraImageUserMessageArea" className="chatbotImageUserMessageArea" src={sourceImage} />
+      <img
+        id="cameraImageUserMessageArea"
+        className="chatbotImageUserMessageArea"
+        src={sourceImage}
+      />
     );
   }
 
   function sortArray(messages) {
-    if(messages.length < 2){
+    if (messages.length < 2) {
       return messages;
     }
-    console.log(`messages: ${JSON.stringify(messages)} type: ${typeof(messages)} isarray: ${Array.isArray(messages)}`)
-    var sortedArray = messages.sort((messageA, messageB) => messageA.index - messageB.index);
+    console.log(
+      `messages: ${JSON.stringify(
+        messages
+      )} type: ${typeof messages} isarray: ${Array.isArray(messages)}`
+    );
+    var sortedArray = messages.sort(
+      (messageA, messageB) => messageA.index - messageB.index
+    );
     return sortedArray;
   }
 
   async function uploadDocument(documentPath, blobData, isCameraUpload) {
     resetState();
     var encodedBlobData = blobData;
-    if(isCameraUpload){
+    if (isCameraUpload) {
       encodedBlobData = blobData.replace(/^data:image\/\w+;base64,/, "");
-      encodedBlobData = Buffer.from(encodedBlobData, 'base64');
+      encodedBlobData = Buffer.from(encodedBlobData, "base64");
     }
     var documentData = encodedBlobData;
-    console.log("upload document")
+    console.log("upload document");
     setDocUploadStatus("Uploading...");
     var uploadResponse = await uploadData({
       path: documentPath,
@@ -153,18 +167,18 @@ const ClassifierComponent = (props) => {
       options: {
         bucket: {
           bucketName: props.customconfig.uploadDocumentBucket,
-          region: props.customconfig.region
-        }
-      }          
+          region: props.customconfig.region,
+        },
+      },
     }).result;
     var encodedImage = blobData;
-    if(!isCameraUpload){
+    if (!isCameraUpload) {
       //convert array buffer to base64
       var imageArrayBuffer = await blobData.arrayBuffer();
       encodedImage = btoa(
         new Uint8Array(imageArrayBuffer).reduce(
           (data, byte) => data + String.fromCharCode(byte),
-          ''
+          ""
         )
       );
     } else {
@@ -183,11 +197,11 @@ const ClassifierComponent = (props) => {
             <tr>
               <td className="classificationStatusMessage">
                 <b> Upload: </b> {docUploadStatus}
-                <br/>
+                <br />
                 <b> Classification: </b> {docClassificationStatus}
-                <br/>
+                <br />
                 <b> Analysis: </b> {docAnalysisStatus}
-                <br/>
+                <br />
               </td>
             </tr>
           </tbody>
@@ -205,7 +219,13 @@ const ClassifierComponent = (props) => {
               <td className="classificationTypeMessage">
                 <>
                   {
-                    <> <b> Type: </b> { classificationMessage.length == 0 ? "-" : getClassificationState() } </>
+                    <>
+                      {" "}
+                      <b> Type: </b>{" "}
+                      {classificationMessage.length == 0
+                        ? "-"
+                        : getClassificationState()}{" "}
+                    </>
                   }
                 </>
               </td>
@@ -213,7 +233,7 @@ const ClassifierComponent = (props) => {
           </tbody>
         </table>
       </>
-    );    
+    );
   }
 
   function classificationImageMessageRow() {
@@ -223,15 +243,13 @@ const ClassifierComponent = (props) => {
         <table className="imageRow">
           <tbody>
             <tr>
-              <td className="imageMessage">                
+              <td className="imageMessage">
                 <>
-                { 
-                  docImage ? (
-                    <>
-                      {chatAssistantMessageImageRow(docImage)}
-                    </>
-                  ) : (<></>)
-                }
+                  {docImage ? (
+                    <>{chatAssistantMessageImageRow(docImage)}</>
+                  ) : (
+                    <></>
+                  )}
                 </>
               </td>
             </tr>
@@ -276,11 +294,17 @@ const ClassifierComponent = (props) => {
         <b> User: </b>
         {userMessage}
         <br />
-        { cameraImage ? (
+        {cameraImage ? (
           <>
-            <img id="cameraImageUserMessageArea" className="chatbotImageUserMessageArea" src={cameraImage} />
-          </>) : (<></>)
-        }
+            <img
+              id="cameraImageUserMessageArea"
+              className="chatbotImageUserMessageArea"
+              src={cameraImage}
+            />
+          </>
+        ) : (
+          <></>
+        )}
       </p>
     );
   }
@@ -288,68 +312,80 @@ const ClassifierComponent = (props) => {
   useEffect(() => {
     const refreshBoard = async () => {
       if (!room || !room.length) {
-        return
+        return;
       }
-      var authToken = await fetchAuthToken()
-      const pr = events.connect(`/default/${room}`)
+      var authToken = await fetchAuthToken();
+      const pr = events.connect(`/default/${room}`);
       pr.then((channel) => {
-        channel.subscribe({
-          next: (data) => {
-            console.log(JSON.stringify(data))
-            var dataEvent = data.event
-            var currentMessageId = dataEvent.requestId
-            var messageType = dataEvent.messageType
-            if(messageType == "status") {
-              var messageStatusType = dataEvent.messageStatusType
-              var messageStatus = dataEvent.messageStatus
-              if(messageStatusType == "analysis") {
-                setDocAnalysisStatus(messageStatus)
-              }
-            }
-            else if(messageType == "analysis") {
-              var docAnalysisMessageChunk = dataEvent.messageChunk
-              var docAnalysisMessageChunkIndex = dataEvent.messageChunkIndex
-              var docAnalysisMessageChunkObject = {
-                index: docAnalysisMessageChunkIndex,
-                chunk: docAnalysisMessageChunk
-              }
-              console.log(`docAnalysisMessageChunkObject: ${JSON.stringify(docAnalysisMessageChunkObject)}`)
-              setLastMessageId(currentMessageId)
-              setMessages((messages) => [...messages, docAnalysisMessageChunkObject])
-            }
-            else if(messageType == "bda") {
-              var bdaMessage = dataEvent.messageBody
-              var messageStatusType = dataEvent.messageStatusType
-              var messageStatus = dataEvent.messageStatus
-              if(messageStatusType != "status"){
-                console.log(`bdaMessage: ${JSON.stringify(bdaMessage)}`)
-                var docClassificationMessageChunk = bdaMessage.document_class.type
-                var docClassificationMessageChunkIndex = 0
-                var docClassificationMessageChunkObject = {
-                  index: docClassificationMessageChunkIndex,
-                  chunk: docClassificationMessageChunk
+        channel.subscribe(
+          {
+            next: (data) => {
+              console.log(JSON.stringify(data));
+              var dataEvent = data.event;
+              var currentMessageId = dataEvent.requestId;
+              var messageType = dataEvent.messageType;
+              if (messageType == "status") {
+                var messageStatusType = dataEvent.messageStatusType;
+                var messageStatus = dataEvent.messageStatus;
+                if (messageStatusType == "analysis") {
+                  setDocAnalysisStatus(messageStatus);
                 }
-                setBdaMessage(bdaMessage)
-                setClassificationMessage((classificationMessage) => [...classificationMessage, docClassificationMessageChunkObject])
-              } else {
-                setDocClassificationStatus(messageStatus)
+              } else if (messageType == "analysis") {
+                var docAnalysisMessageChunk = dataEvent.messageChunk;
+                var docAnalysisMessageChunkIndex = dataEvent.messageChunkIndex;
+                var docAnalysisMessageChunkObject = {
+                  index: docAnalysisMessageChunkIndex,
+                  chunk: docAnalysisMessageChunk,
+                };
+                console.log(
+                  `docAnalysisMessageChunkObject: ${JSON.stringify(
+                    docAnalysisMessageChunkObject
+                  )}`
+                );
+                setLastMessageId(currentMessageId);
+                setMessages((messages) => [
+                  ...messages,
+                  docAnalysisMessageChunkObject,
+                ]);
+              } else if (messageType == "bda") {
+                var bdaMessage = dataEvent.messageBody;
+                var messageStatusType = dataEvent.messageStatusType;
+                var messageStatus = dataEvent.messageStatus;
+                if (messageStatusType != "status") {
+                  console.log(`bdaMessage: ${JSON.stringify(bdaMessage)}`);
+                  var docClassificationMessageChunk =
+                    bdaMessage.document_class.type;
+                  var docClassificationMessageChunkIndex = 0;
+                  var docClassificationMessageChunkObject = {
+                    index: docClassificationMessageChunkIndex,
+                    chunk: docClassificationMessageChunk,
+                  };
+                  setBdaMessage(bdaMessage);
+                  setClassificationMessage((classificationMessage) => [
+                    ...classificationMessage,
+                    docClassificationMessageChunkObject,
+                  ]);
+                } else {
+                  setDocClassificationStatus(messageStatus);
+                }
               }
-            }
+            },
+            error: (value) => console.error(value),
           },
-          error: (value) => console.error(value),
-        }, { authToken: authToken })
-      })
+          { authToken: authToken }
+        );
+      });
       return () => {
-        pr?.then((channel) => channel?.close())
-      }
+        pr?.then((channel) => channel?.close());
+      };
     };
     refreshBoard();
-  }, [room])
+  }, [room]);
 
   async function submitQuery(userId, event) {
     var cameraImageData;
-    if(cameraImage){
-      cameraImageData = cameraImage.split(",")[1]
+    if (cameraImage) {
+      cameraImageData = cameraImage.split(",")[1];
     }
     const query = {
       prompt: state,
@@ -412,29 +448,41 @@ const ClassifierComponent = (props) => {
     setState(event.target.value);
   }
 
-  function getBdaMessageState(){
-    if(bdaMessage){
-      return chatAssistantMessageRow(JSON.stringify(bdaMessage.inference_result));
+  function getBdaMessageState() {
+    if (bdaMessage) {
+      return chatAssistantMessageRow(
+        JSON.stringify(bdaMessage.inference_result)
+      );
     }
   }
 
-  function getClassifierChatState(){
-    if(messages.length === 0){
-      return chatAssistantMessageRow(initialAssistantMessage)
+  function getClassifierChatState() {
+    if (messages.length === 0) {
+      return chatAssistantMessageRow(initialAssistantMessage);
     } else {
-      return chatAssistantMessageRow(sortArray(messages).map((message) => (message.chunk)).join(''));
+      return chatAssistantMessageRow(
+        sortArray(messages)
+          .map((message) => message.chunk)
+          .join("")
+      );
     }
   }
 
   function getClassificationState() {
-    console.log(`classificationMessage: ${JSON.stringify(classificationMessage)}`)
+    console.log(
+      `classificationMessage: ${JSON.stringify(classificationMessage)}`
+    );
     var sortedClassificationMessage = sortArray(classificationMessage);
-    console.log(`sortedClassificationMessage: ${JSON.stringify(sortedClassificationMessage)}`)
-    return sortedClassificationMessage.map((message) => (message.chunk)).join('')
+    console.log(
+      `sortedClassificationMessage: ${JSON.stringify(
+        sortedClassificationMessage
+      )}`
+    );
+    return sortedClassificationMessage.map((message) => message.chunk).join("");
   }
 
   return (
-    <div>   
+    <div>
       <div className="classifierMenuColumnArea">
         <div class="classifierColumnArea">
           <CameraComponent
@@ -444,7 +492,11 @@ const ClassifierComponent = (props) => {
           />
         </div>
         <div className="classifierColumnArea">
-          <button className="fileAttachmentButton" size="small" onClick={() => hiddenInput.current.click()}/>
+          <button
+            className="fileAttachmentButton"
+            size="small"
+            onClick={() => hiddenInput.current.click()}
+          />
           <VisuallyHidden>
             <input
               type="file"
@@ -452,7 +504,7 @@ const ClassifierComponent = (props) => {
               ref={hiddenInput}
               onChange={onFilePickerChange}
               multiple={true}
-              accept={acceptedFileTypes.join(',')}
+              accept={acceptedFileTypes.join(",")}
             />
           </VisuallyHidden>
         </div>
@@ -461,35 +513,30 @@ const ClassifierComponent = (props) => {
         <div id="classifier-tablearea" className="classifierTableArea">
           <div id="classifier-area" className="classifierArea">
             <div id="classifier-textarea" className="classifierTextArea">
-              {
-                getBdaMessageState()
-              }
-              {
-                getClassifierChatState()
-              }
+              {getBdaMessageState()}
+              {getClassifierChatState()}
             </div>
           </div>
         </div>
         <div id="classifier-tablearea2" className="classifierTableArea">
-          <div id="classifier-classificationtype-section" className="classificationTypeSection">          
-            {
-                classificationTypeMessageRow()
-            }
-          </div>          
-          <div id="classifier-uploadedimage-section" className="uploadedImageSection">          
-            {
-                classificationImageMessageRow()
-            }
+          <div
+            id="classifier-classificationtype-section"
+            className="classificationTypeSection"
+          >
+            {classificationTypeMessageRow()}
+          </div>
+          <div
+            id="classifier-uploadedimage-section"
+            className="uploadedImageSection"
+          >
+            {classificationImageMessageRow()}
           </div>
           <div id="classifier-documentlist" className="classifierDocList">
-            {
-              classificationStatusMessageRow()
-            }
+            {classificationStatusMessageRow()}
           </div>
         </div>
       </div>
     </div>
   );
-
 };
 export default ClassifierComponent;

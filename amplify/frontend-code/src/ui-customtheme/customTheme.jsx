@@ -70,20 +70,20 @@ const CustomTheme = {
     components: {
       radiogroup: {
         radio: {
-          borderWidth: { value: 'none' },
-          borderColor: { value: '{colors.purple.40}' },
-          backgroundColor: { value: '{colors.purple.40}' },
+          borderWidth: { value: "none" },
+          borderColor: { value: "{colors.purple.40}" },
+          backgroundColor: { value: "{colors.purple.40}" },
           _checked: {
-            color: { value: '{colors.purple.80}' },
+            color: { value: "{colors.purple.80}" },
           },
           label: {
-            color: { value: '{colors.black.80}' },
-            fontSize: { value: "1rem" }
+            color: { value: "{colors.black.80}" },
+            fontSize: { value: "1rem" },
           },
         },
         legend: {
-          color: { value: '{colors.purple.80}' },
-          fontWeight: { value: '{fontWeights.bold}' },
+          color: { value: "{colors.purple.80}" },
+          fontWeight: { value: "{fontWeights.bold}" },
         },
       },
       textareafield: {

@@ -11,7 +11,7 @@ import { useState } from "react";
 
 async function initConfiguration() {
   await Amplify.configure({
-    ssr: true
+    ssr: true,
   });
 
   const appSyncAuthMode = customconfig.appSyncAuthMode;
@@ -22,7 +22,7 @@ async function initConfiguration() {
   const region = customconfig.region;
   const uploadDocumentBucket = customconfig.uploadDocumentBucket;
 
-  return await Amplify.configure({  
+  return await Amplify.configure({
     Auth: {
       Cognito: {
         identityPoolId: identityPoolId,
@@ -36,26 +36,26 @@ async function initConfiguration() {
           email: {
             required: true,
           },
-        }
-      }
-    },    
+        },
+      },
+    },
     API: {
       Events: {
         endpoint: appSyncEndpoint,
         region: region,
-        defaultAuthMode: appSyncAuthMode
-      }
+        defaultAuthMode: appSyncAuthMode,
+      },
     },
     Storage: {
       bucket: uploadDocumentBucket, //REQUIRED -  Amazon S3 bucket
       region: region, //OPTIONAL -  Amazon service region
       buckets: {
-        'default-bucket': {
+        "default-bucket": {
           bucketName: uploadDocumentBucket,
-          region: region
-        }
-      }
-    }
+          region: region,
+        },
+      },
+    },
   });
 }
 await initConfiguration();
@@ -67,9 +67,7 @@ const App = () => {
       {({ signOut }) => (
         <main>
           <HeaderComponent />
-          <ClassifierComponent
-            customconfig={customconfig}
-          />
+          <ClassifierComponent customconfig={customconfig} />
           <div id="signout-button" className="signOutButton">
             <Button
               color="white"

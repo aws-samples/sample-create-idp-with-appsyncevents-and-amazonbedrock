@@ -101,7 +101,7 @@ Image {
 
 .uploadedImageSection {
   text-align: center;
-  object-fit: cover;  
+  object-fit: cover;
 }
 
 .classifierArea {
@@ -148,7 +148,7 @@ Image {
 
 .chatbotImageUserMessageArea {
   max-height: 170;
-  max-width: 170px;  
+  max-width: 170px;
   text-align: center;
   resize: none;
   margin: auto;
@@ -320,7 +320,9 @@ Image {
   text-align: left;
 }
 
-.classificationTypeSection, .classifierDocList, .uploadedImageSection {
+.classificationTypeSection,
+.classifierDocList,
+.uploadedImageSection {
   background-color: #a97df9;
   border-radius: 15px;
   display: flex;
@@ -343,9 +345,9 @@ Image {
   padding: 0;
   border: none;
   margin-right: 0;
-  margin-left: 0;  
+  margin-left: 0;
   height: 60px;
-  max-height: 60px;  
+  max-height: 60px;
 }
 
 .imageRow {
@@ -353,18 +355,19 @@ Image {
   padding: 0;
   border: none;
   margin-right: 0;
-  margin-left: 0;  
+  margin-left: 0;
   height: 100px;
   max-height: 100px;
 }
 
 .classificationMessage {
   margin: 0;
-  text-align: center;  
+  text-align: center;
 }
+
 .classificationTypeMessage {
   margin: 0;
-  text-align: left;  
+  text-align: left;
 }
 
 .imageMessage {

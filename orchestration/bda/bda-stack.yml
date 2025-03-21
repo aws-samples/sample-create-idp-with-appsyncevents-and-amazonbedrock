@@ -19,7 +19,7 @@ Parameters:
   BdaLambdaFunctionRuntime:
     Type: String
     Description: Runtime of the Lambda function interacting with Bedrock
-    Default: python3.13    
+    Default: python3.13
   BedrockLambdaS3Bucket:
     Type: String
     Description: S3 bucket for the Lambda function's code (zip file)
@@ -182,7 +182,7 @@ Resources:
       State: "ENABLED"
       Targets:
         - Arn: !GetAtt BdaLambdaFunction.Arn
-          Id: BdaLambdaFunction        
+          Id: BdaLambdaFunction
 
   BdaEventRuleRole:
     Type: AWS::IAM::Role

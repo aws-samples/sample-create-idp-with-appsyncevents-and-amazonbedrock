@@ -40,7 +40,7 @@ def getCanonicalRequest(payload, host, endpoint, datestamp, amzdate):
         + "x-amz-security-token:"
         + getSessionToken()
         + "\n"
-    )    
+    )
     payload_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
     canonical_request = (
         method
@@ -83,8 +83,10 @@ def getSignatureKey(key, dateStamp, regionName, serviceName):
     kSigning = sign(kService, "aws4_request")
     return kSigning
 
+
 def getSessionToken():
     return os.environ["AWS_SESSION_TOKEN"]
+
 
 def getTemporaryCredentials():
     access_key = os.environ["AWS_ACCESS_KEY_ID"]
@@ -96,8 +98,8 @@ def getTemporaryCredentials():
 def getHeaders(payload, host, endpoint):
     # Create a datetime object for signing
     t = datetime.datetime.now(datetime.UTC)
-    amzdate = t.strftime('%Y%m%dT%H%M%SZ')
-    datestamp = t.strftime('%Y%m%d')
+    amzdate = t.strftime("%Y%m%dT%H%M%SZ")
+    datestamp = t.strftime("%Y%m%d")
 
     # getTemporaryCredentials
     access_key, secret_key, session_token = getTemporaryCredentials()
@@ -128,11 +130,11 @@ def getHeaders(payload, host, endpoint):
     )
 
     return {
-        'accept': "application/json, text/javascript",
-        'content-encoding': "amz-1.0",    
-        'content-type': "application/json; charset=UTF-8",
-        'Host': host,
-        'x-amz-date': amzdate,
-        'X-Amz-Security-Token': session_token,
-        'Authorization': authorization_header
+        "accept": "application/json, text/javascript",
+        "content-encoding": "amz-1.0",
+        "content-type": "application/json; charset=UTF-8",
+        "Host": host,
+        "x-amz-date": amzdate,
+        "X-Amz-Security-Token": session_token,
+        "Authorization": authorization_header,
     }

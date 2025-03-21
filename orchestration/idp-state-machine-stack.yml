@@ -128,7 +128,7 @@ Resources:
                   - s3:GetObject
                 Resource: !Sub
                   - "arn:aws:s3:::${IdpS3Bucket}/*"
-                  - IdpS3Bucket: !Ref IdpS3Bucket                  
+                  - IdpS3Bucket: !Ref IdpS3Bucket
 
   ################### State Machine with 2 states calling the Lambda function
 
@@ -190,7 +190,7 @@ Resources:
                 JitterStrategy: FULL
             Next: IdpAnalysisStep
           IdpAnalysisStep:
-            QueryLanguage: JSONata          
+            QueryLanguage: JSONata
             Type: Task
             Resource: "arn:aws:states:::lambda:invoke"
             Output: "{% $states.result.Payload %}"

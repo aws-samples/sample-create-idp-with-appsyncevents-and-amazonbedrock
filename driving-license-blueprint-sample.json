@@ -1,0 +1,79 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"description": "default",
+	"class": "default",
+	"type": "object",
+	"definitions": {},
+	"properties": {
+		"License Number": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The unique identifier number for the driver's license"
+		},
+		"Date of Birth": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The date of birth of the license holder"
+		},
+		"Issue Date": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The date the driver's license was issued"
+		},
+		"Expiration Date": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The date the driver's license expires"
+		},
+		"Name": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The full name of the license holder"
+		},
+		"Address": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The residential address of the license holder"
+		},
+		"License Class": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The class of driver's license held by the license holder"
+		},
+		"State": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The state that issued the driver's license"
+		},
+		"Organ Donor": {
+			"type": "boolean",
+			"inferenceType": "explicit",
+			"instruction": "Indicates if the license holder is an organ donor"
+		},
+		"Restrictions": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "Any restrictions on the driver's license"
+		},
+		"Sex": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The sex of the license holder"
+		},
+		"Height": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The height of the license holder"
+		},
+		"Eye Color": {
+			"type": "string",
+			"inferenceType": "explicit",
+			"instruction": "The eye color of the license holder"
+		},
+		"Charge": {
+			"type": "number",
+			"inferenceType": "explicit",
+			"instruction": "The charge amount for the driver's license"
+		}
+	}
+}

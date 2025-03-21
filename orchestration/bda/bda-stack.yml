@@ -1,0 +1,223 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: EventBridge rule calling Lambda function to process results from Bedrock Data Automation
+Parameters:
+  BdaS3Bucket:
+    Type: String
+    Description: S3 bucket for Amazon Bedrock Data Automation
+  IdpS3Bucket:
+    Type: String
+    Description: S3 bucket for IdP processing
+  BdaLambdaFunctionName:
+    Type: String
+    Description: Name of the Lambda function interacting with Bedrock
+    Default: bda-lambda
+  BdaLambdaFunctionMemorySize:
+    Type: Number
+    Description: Memory size of the Lambda function interacting with Bedrock
+    Default: 4096
+  BdaLambdaFunctionRuntime:
+    Type: String
+    Description: Runtime of the Lambda function interacting with Bedrock
+    Default: python3.13
+  BedrockLambdaS3Bucket:
+    Type: String
+    Description: S3 bucket for the Lambda function's code (zip file)
+  BedrockLambdaS3Key:
+    Type: String
+    Description: S3 key for the Lambda function's code (zip file)
+  AppSyncApi:
+    Type: String
+    Description: Amazon AppSync Api ID
+  AppSyncApiUrl:
+    Type: String
+    Description: Amazon AppSync Api URL
+  AppSyncApiChannel:
+    Type: String
+    Description: Amazon AppSync Api Channel
+    Default: default/channel
+  DataAutomationProfile:
+    Type: String
+    Description: Data Automation Profile
+    Default: us.data-automation-v1
+  DataAutomationProjectArn:
+    Type: String
+    Description: Data Automation Project ARN
+
+Resources:
+  ################### Lambda function resources to interact with Amazon Bedrock Data Automation #################
+  BdaLambdaFunctionApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt BdaLambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+
+  BdaLambdaFunctionStatesApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt BdaLambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: states.amazonaws.com
+
+  BdaLambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaFunctionLogsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+        - PolicyName: LambdaFunctionIdpS3Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub
+                  - "arn:aws:s3:::${IdpS3Bucket}/*"
+                  - BdaS3Bucket: !Ref IdpS3Bucket
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Sub
+                  - "arn:aws:s3:::${IdpS3Bucket}"
+                  - BdaS3Bucket: !Ref IdpS3Bucket
+        - PolicyName: LambdaFunctionBdaS3Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub
+                  - "arn:aws:s3:::${BdaS3Bucket}/*"
+                  - BdaS3Bucket: !Ref BdaS3Bucket
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Sub
+                  - "arn:aws:s3:::${BdaS3Bucket}"
+                  - BdaS3Bucket: !Ref BdaS3Bucket
+        - PolicyName: LambdaFunctionAppSyncEventsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - appsync:EventPublish
+                Resource: !Sub
+                  - "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApi}/channelNamespace/*"
+                  - AppSyncApi: !Ref AppSyncApi
+        - PolicyName: LambdaFunctionBdaPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:GetDataAutomationProject
+                  - bedrock:InvokeDataAutomationAsync
+                Resource: "*"
+
+  BdaLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function interacting with Amazon Bedrock
+      FunctionName: !Ref BdaLambdaFunctionName
+      Runtime: !Ref BdaLambdaFunctionRuntime
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt BdaLambdaFunctionRole.Arn
+      MemorySize: !Ref BdaLambdaFunctionMemorySize
+      Environment:
+        Variables:
+          AppSyncApi: !Ref AppSyncApi
+          AppSyncApiUrl: !Ref AppSyncApiUrl
+          AppSyncApiChannel: !Ref AppSyncApiChannel
+          BdaS3Bucket: !Ref BdaS3Bucket
+          DataAutomationProfileArn: !Sub
+            - "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:data-automation-profile/${DataAutomationProfile}"
+            - DataAutomationProfile: !Ref DataAutomationProfile
+          DataAutomationProjectArn: !Ref DataAutomationProjectArn
+      Timeout: 60
+      Code:
+        S3Bucket: !Ref BedrockLambdaS3Bucket
+        S3Key: !Ref BedrockLambdaS3Key
+
+  ################### EventBridge rule calling Lambda function #########################
+  BdaEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventPattern:
+        source:
+          - "aws.s3"
+        detail-type:
+          - "Object Created"
+        detail:
+          bucket:
+            name:
+              - !Ref BdaS3Bucket
+          object:
+            key:
+              - wildcard: "inference_results/*/custom_output/*/result.json"
+      Name: BdaEventRule
+      RoleArn: !GetAtt BdaEventRuleRole.Arn
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt BdaLambdaFunction.Arn
+          Id: BdaLambdaFunction
+
+  BdaEventRuleRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: BdaEventRulePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !GetAtt BdaLambdaFunction.Arn
+
+Outputs:
+  BdaEventRuleId:
+    Description: ID of the EventBridge rule
+    Value: !GetAtt BdaEventRule.Arn
+  BdaLambdaFunctionName:
+    Description: Name of the Lambda function
+    Value: !Ref BdaLambdaFunctionName
+    Export:
+      Name: !Sub "${AWS::StackName}-BdaLambdaFunctionName"
+  BdaLambdaFunctionArn:
+    Description: ARN of the Lambda function
+    Value: !GetAtt BdaLambdaFunction.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-BdaLambdaFunctionArn"

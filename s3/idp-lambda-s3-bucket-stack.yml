@@ -1,0 +1,153 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Template for S3 bucket to upload documents
+Parameters:
+  S3IdpLambdaBucketNamePrefix:
+    Type: String
+    Description: The name prefix of the S3 bucket where the Lambda code is stored.
+    Default: "idplambda"
+    MinLength: 1
+    MaxLength: 12
+Resources:
+  # S3 bucket
+  S3IdpLambdaBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      # Make the bucket name unique using:
+      # Prefix (12 chars)
+      # Account id (12 digits)
+      # CloudFormation stack id (36 chars)
+      # Separators (2 characters)
+      BucketName: !Sub
+        - "${bucketprefix}-${accountid}-${stackid}"
+        - bucketprefix: !Ref "S3IdpLambdaBucketNamePrefix"
+          accountid: !Ref "AWS::AccountId"
+          stackid: !Select ["2", !Split ["/", !Ref "AWS::StackId"]]
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+      Tags:
+        - Key: "NamePrefix"
+          Value: !Sub "${S3IdpLambdaBucketNamePrefix}"
+
+  # Lambda IAM role
+  S3EmptyLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName:
+            Fn::Join:
+              - ""
+              - - S3EmptyLambdaPolicy-
+                - Ref: AWS::Region
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStackResource
+                  - cloudformation:DescribeStackResources
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:DeleteObject
+                Resource: "*"
+
+  # Custom resource to execute Lambda function (empty S3 bucket, upon deletion)
+  S3EmptyLambdaCustomResource:
+    Description: Call Lambda function to empty S3 bucket
+    Type: Custom::S3EmptyLambdaCustomResource
+    DependsOn:
+      - S3EmptyLambdaExecutionRole
+    Properties:
+      Tags:
+        - Key: Environment
+          Value: Dev
+      ServiceToken:
+        Fn::GetAtt:
+          - S3EmptyLambdaFunction
+          - Arn
+      REGION:
+        Ref: AWS::Region
+      StackName:
+        Ref: AWS::StackName
+      S3IdpLambdaBucket:
+        Ref: S3IdpLambdaBucket
+
+  # Lambda function to empty S3 bucket, upon deletion
+  S3EmptyLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Tags:
+        - Key: Environment
+          Value: Dev
+      Handler: index.lambda_handler
+      Role:
+        Fn::GetAtt:
+          - S3EmptyLambdaExecutionRole
+          - Arn
+      Runtime: python3.9
+      MemorySize: 256
+      Timeout: "600"
+      Code:
+        ZipFile: |
+          from __future__ import print_function
+          import boto3
+          import json
+          import os
+          import time
+          import traceback
+          import cfnresponse
+          import logging
+          logger = logging.getLogger()
+          logger.setLevel("INFO")
+
+          def lambda_handler(event, context):
+              logger.info('event: {}'.format(event))
+              logger.info('context: {}'.format(context))
+              responseData = {}
+
+              status = cfnresponse.SUCCESS
+              try:
+                if event['RequestType'] == 'Delete':
+                    # delete files in bucket
+                    s3 = boto3.resource('s3')
+                    s3bucketname = event['ResourceProperties']['S3IdpLambdaBucket']
+                    s3bucket = s3.Bucket(s3bucketname)
+                    for obj in s3bucket.objects.filter():
+                      s3.Object(s3bucket.name, obj.key).delete()
+                    responseData = {'Success': 'Custom Resource removed'}
+                    cfnresponse.send(event, context, status, responseData, 'CustomResourcePhysicalID')
+                if event['RequestType'] == 'Create':
+                    responseData = {'Success': 'No action to perform during creation of S3 bucket'}
+                    cfnresponse.send(event, context, status, responseData, 'CustomResourcePhysicalID')
+              except Exception as e:
+                  status = cfnresponse.FAILED
+                  print(traceback.format_exc())
+                  responseData = {'Error': traceback.format_exc(e)}
+              finally:
+                  cfnresponse.send(event, context, status, responseData, 'CustomResourcePhysicalID')
+
+Outputs:
+  S3IdpLambdaBucket:
+    Description: S3 bucket name
+    Value: !Ref S3IdpLambdaBucket

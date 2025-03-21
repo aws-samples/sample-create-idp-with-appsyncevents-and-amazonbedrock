@@ -1,0 +1,211 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: AppSync Events API to manage events to be read by web application
+Parameters:
+  AppSyncEventsApiName:
+    Type: String
+    Default: "idp-events-api"
+    Description: Name of the AppSync Events API
+  AppSyncEventsApiChannelNamespace:
+    Type: String
+    Default: "default"
+    Description: Events Channel Namespace to be used for publishing events to the AppSync Events API
+  CognitoStackName:
+    Type: String
+    Default: idp-cognito-userpool-stack
+    Description: Name of the Cognito Stack
+  CognitoUserPoolIdExportName:
+    Type: String
+    Default: UserPoolId
+    Description: Name of the Cognito User Pool ID in the Cognito Stack
+  CognitoUserPoolClientIdExportName:
+    Type: String
+    Default: UserPoolClientId
+    Description: Name of the Cognito User Pool Client ID in the Cognito Stack
+  LambdaAuthFunctionName:
+    Type: String
+    Description: ARN of the Lambda Authorizer function
+    Default: appsync-events-lambda-auth
+  LambdaAuthFunctionMemorySize:
+    Type: Number
+    Description: Memory size of the Lambda Authorizer function
+    Default: 4096
+  LambdaAuthFunctionRuntime:
+    Type: String
+    Description: Runtime of the Lambda function
+    Default: python3.12
+  LambdaAuthS3Bucket:
+    Type: String
+    Description: S3 bucket for the Lambda Authorizer function's code (zip file)
+  LambdaAuthS3Key:
+    Type: String
+    Description: S3 key for the Lambda Authorizer function's code (zip file)
+Resources:
+  # CloudWatch Log Group for AppSync Events API
+  EventsApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/appsync/apis/${AppSyncEventsApiName}/logs
+
+  # Appsync Events API Service Role
+  EventsApiServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - appsync.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: AppSyncEventsServiceRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+
+  # Lambda Authorizer permission
+  LambdaAuthorizerPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaAuthorizerFunction
+      Action: lambda:InvokeFunction
+      Principal: appsync.amazonaws.com
+
+  # Lambda Authorizer IAM role
+  LambdaAuthFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - appsync.amazonaws.com
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaAuthorizerFunctionPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaAuthFunctionName}
+              - Effect: Allow
+                Action:
+                  - sts:GetServiceBearerToken
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                Resource: "*"
+
+  # AppSync Lambda authorizer
+  LambdaAuthorizerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function to decode JWT token
+      FunctionName: !Ref LambdaAuthFunctionName
+      Runtime: !Ref LambdaAuthFunctionRuntime
+      Handler: lambda_authorizer.handler
+      Role: !GetAtt LambdaAuthFunctionRole.Arn
+      MemorySize: !Ref LambdaAuthFunctionMemorySize
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !ImportValue
+            Fn::Sub: ${CognitoStackName}-${CognitoUserPoolIdExportName}
+          COGNITO_APP_CLIENT_ID: !ImportValue
+            Fn::Sub: ${CognitoStackName}-${CognitoUserPoolClientIdExportName}
+      Code:
+        S3Bucket: !Ref LambdaAuthS3Bucket
+        S3Key: !Ref LambdaAuthS3Key
+
+  # AppSync Data Source for 'Events' API
+  AppSyncEventsApi:
+    Type: AWS::AppSync::Api
+    Properties:
+      Name: !Sub ${AppSyncEventsApiName}
+      EventConfig:
+        AuthProviders:
+          - AuthType: AWS_LAMBDA
+            LambdaAuthorizerConfig:
+              AuthorizerUri: !GetAtt LambdaAuthorizerFunction.Arn
+          - AuthType: AWS_IAM
+        ConnectionAuthModes:
+          - AuthType: AWS_LAMBDA
+          - AuthType: AWS_IAM
+        DefaultPublishAuthModes:
+          - AuthType: AWS_LAMBDA
+          - AuthType: AWS_IAM
+        DefaultSubscribeAuthModes:
+          - AuthType: AWS_LAMBDA
+          - AuthType: AWS_IAM
+        LogConfig:
+          CloudWatchLogsRoleArn: !GetAtt EventsApiServiceRole.Arn
+          LogLevel: "ALL"
+
+  # AppSync Events API's channel namespace
+  AppSyncEventsApiChannel:
+    Type: AWS::AppSync::ChannelNamespace
+    Properties:
+      ApiId: !GetAtt AppSyncEventsApi.ApiId
+      Name: !Ref AppSyncEventsApiChannelNamespace
+
+Outputs:
+  AppSyncEventsApiId:
+    Value: !GetAtt AppSyncEventsApi.ApiId
+    Description: ID of the AppSync Events API
+  AppSyncEventsApiName:
+    Value: !Ref AppSyncEventsApiName
+    Description: Name of the AppSync Events API
+  AppSyncEventsApiArn:
+    Value: !Ref AppSyncEventsApi
+    Description: ARN of the AppSync Events API
+  AppSyncEventsApiHttpUrl:
+    Value: !GetAtt AppSyncEventsApi.Dns.Http
+    Description: HTTP endpoint of the AppSync Events API
+  AppSyncEventsApiRealtimeUrl:
+    Value: !GetAtt AppSyncEventsApi.Dns.Realtime
+    Description: Real-time endpoint of the AppSync Events API
+  AppSyncEventsApiChannelName:
+    Value: !Ref AppSyncEventsApiChannelNamespace
+    Description: Name of the AppSync Events API Channel Namespace
+  AppSyncEventsApiChannel:
+    Value: !Ref AppSyncEventsApiChannel
+    Description: ID of the AppSync Events API Channel
+  AppSyncEventsApiLogGroup:
+    Value: !Ref EventsApiLogGroup
+    Description: CloudWatch Log Group for the AppSync Events API
+  AppSyncEventsApiServiceRole:
+    Value: !Ref EventsApiServiceRole
+    Description: Service Role for the AppSync Events API
+  LambdaAuthorizerFunction:
+    Value: !Ref LambdaAuthorizerFunction
+    Description: ARN of the Lambda Authorizer function
+  LambdaAuthorizerFunctionRole:
+    Value: !Ref LambdaAuthFunctionRole
+    Description: Role of the Lambda Authorizer function
+  LambdaAuthorizerPermission:
+    Value: !Ref LambdaAuthorizerPermission
+    Description: Permission for the Lambda Authorizer function

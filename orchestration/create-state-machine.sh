@@ -1,10 +1,6 @@
 #!/bin/bash
 source $HOME/.bashrc
 
-# Retrieve S3 bucket used to upload documents for BDA processing
-bda_bucket_stack_name="bda-s3-bucket-stack"
-BDA_BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name "$bda_bucket_stack_name" --query 'Stacks[0].Outputs[?OutputKey==`S3IdpBdaBucket`].OutputValue' --output text)
-
 # Retrieve AppSync API URL
 appsync_events_stack_name="idp-appsync-stack"
 APPSYNC_API=$(aws cloudformation describe-stacks --stack-name "$appsync_events_stack_name" --query 'Stacks[0].Outputs[?OutputKey==`AppSyncEventsApiId`].OutputValue' --output text)

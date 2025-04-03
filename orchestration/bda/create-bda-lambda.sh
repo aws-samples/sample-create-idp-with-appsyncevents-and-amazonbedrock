@@ -2,6 +2,10 @@
 source $HOME/.bashrc
 bda_eb_notif_stack_name="bda-eb-notif-stack"
 
+# Retrieve S3 bucket used to upload documents for BDA processing
+bda_bucket_stack_name="bda-s3-bucket-stack"
+BDA_BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name "$bda_bucket_stack_name" --query 'Stacks[0].Outputs[?OutputKey==`S3IdpBdaBucket`].OutputValue' --output text)
+
 # Retrieve S3 bucket for Lambda zip package
 s3_lambdacode_bucket_stack_name="idp-lambda-s3-bucket-stack"
 IDP_LAMBDA_BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name "$s3_lambdacode_bucket_stack_name" --query 'Stacks[0].Outputs[?OutputKey==`S3IdpLambdaBucket`].OutputValue' --output text)
@@ -17,7 +21,6 @@ s3_idp_bucket_stack_name="idp-s3-bucket-stack"
 IDP_BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name "$s3_idp_bucket_stack_name" --query 'Stacks[0].Outputs[?OutputKey==`S3IdpDocBucket`].OutputValue' --output text)
 
 # Retrieve BDA S3 bucket
-BDA_BUCKET_NAME="$1"
 aws cloudformation create-stack \
     --stack-name "$bda_eb_notif_stack_name" \
     --capabilities "CAPABILITY_IAM" \

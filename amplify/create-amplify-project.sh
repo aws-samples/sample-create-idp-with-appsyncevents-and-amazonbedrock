@@ -2,8 +2,8 @@ AMPLIFY_FRONTEND_CODE="frontend-code"
 AMPLIFY_PROJECT="amplify-idp"
 
 # Create Amplify project
+npm create vite@latest $AMPLIFY_PROJECT --yes -- --template react-ts
 npm create amplify@latest --yes
-npm create vite@latest $AMPLIFY_PROJECT -- --template react-ts
 
 # Create configuration file
 pwd

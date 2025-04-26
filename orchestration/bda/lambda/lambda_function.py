@@ -28,8 +28,9 @@ bda_profile_arn = os.environ["DataAutomationProfileArn"]
 bda_project_arn = os.environ["DataAutomationProjectArn"]
 
 
-def call_websocket_endpoint(url, data):
-    request = json.dumps({"channel": channel, "events": [json.dumps(data)]})
+def call_websocket_endpoint(url, data, identityId):
+    userChannel = f"{channel}/{identityId}"
+    request = json.dumps({"channel": userChannel, "events": [json.dumps(data)]})
     logger.info(f"appsync request: {request}")
     headers = appsyncheader.getHeaders(request, host, endpoint)
     logger.info(f"appsync request headers: {headers}")
@@ -56,36 +57,36 @@ def get_request_id(response):
     return response_id
 
 
-def notify_appsync_endpoint(data):
-    response = call_websocket_endpoint(request_url, data)
+def notify_appsync_endpoint(data, identityId):
+    response = call_websocket_endpoint(request_url, data, identityId)
     return response
 
 
-def send_message_notification(requestId, messageBody, messageType):
+def send_message_notification(requestId, messageBody, messageType, identityId):
     notification = {
         "requestId": requestId,
         "messageBody": messageBody,
         "messageType": messageType,
     }
-    response = notify_appsync_endpoint(notification)
+    response = notify_appsync_endpoint(notification, identityId)
     return response
 
 
-def send_status_notification(requestId, messageStatus, messageStatusType, messageType):
+def send_status_notification(requestId, messageStatus, messageStatusType, messageType, identityId):
     notification = {
         "requestId": requestId,
         "messageStatus": messageStatus,
         "messageStatusType": messageStatusType,
         "messageType": messageType,
     }
-    response = notify_appsync_endpoint(notification)
+    response = notify_appsync_endpoint(notification, identityId)
     return response
 
 
-def start_bda_automation(bda_s3bucket, key):
+def start_bda_automation(bda_s3bucket, key, identityId):
     s3Uri = f"s3://{bda_s3bucket}"
     s3InputUri = f"{s3Uri}/{key}"
-    s3OutputUri = f"{s3Uri}/inference_results"
+    s3OutputUri = f"{s3Uri}/{identityId}/inference_results"
 
     data_automation_project = bda.get_data_automation_project(
         projectArn=bda_project_arn
@@ -123,6 +124,9 @@ def lambda_handler(event, context):
     bucket = event["detail"]["bucket"]["name"]
     key = event["detail"]["object"]["key"]
 
+    #retrieve identity id (parse first folder of S3 key)
+    identityId = key.split("/")[0]
+
     # retrieve input details from the event
     isBdaInit = "inputType" in event
 
@@ -132,15 +136,15 @@ def lambda_handler(event, context):
 
     if isBdaInit:
         copy_s3_document(bda_s3bucket, key, s3_data)
-        start_bda_automation(bda_s3bucket, key)
+        start_bda_automation(bda_s3bucket, key, identityId)
         # status notification (bda pending)
         messageBody = "Pending"
     else:
         # message notification
-        send_message_notification(requestId, to_json_content(s3_data), messageType)
+        send_message_notification(requestId, to_json_content(s3_data), messageType, identityId)
         # status notification (bda completed)
         messageBody = "Completed"
 
     # status notification (bda completed)
-    send_status_notification(requestId, messageBody, "status", messageType)
+    send_status_notification(requestId, messageBody, "status", messageType, identityId)
     return {"statusCode": 200, "body": messageBody}

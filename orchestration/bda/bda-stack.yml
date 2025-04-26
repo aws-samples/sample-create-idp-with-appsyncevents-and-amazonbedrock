@@ -176,7 +176,7 @@ Resources:
               - !Ref BdaS3Bucket
           object:
             key:
-              - wildcard: "inference_results/*/custom_output/*/result.json"
+              - wildcard: "*/inference_results/*/custom_output/*/result.json"
       Name: BdaEventRule
       RoleArn: !GetAtt BdaEventRuleRole.Arn
       State: "ENABLED"

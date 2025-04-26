@@ -26,8 +26,9 @@ request_url = f"https://{host}{endpoint}"
 modelId = os.environ["BedrockModelName"]
 
 
-def call_websocket_endpoint(url, data):
-    request = json.dumps({"channel": channel, "events": [json.dumps(data)]})
+def call_websocket_endpoint(url, data, identityId):
+    userChannel = f"{channel}/{identityId}"
+    request = json.dumps({"channel": userChannel, "events": [json.dumps(data)]})
     logger.info(f"appsync request: {request}")
     headers = appsyncheader.getHeaders(request, host, endpoint)
     logger.info(f"appsync request headers: {headers}")
@@ -49,7 +50,7 @@ def get_request_id(response):
     return response_id
 
 
-def invoke_model(prompt, promptType, data):
+def invoke_model(prompt, promptType, data, identityId):
     user_message = {
         "role": "user",
         "content": [
@@ -83,20 +84,20 @@ def invoke_model(prompt, promptType, data):
     requestId = get_request_id(response)
 
     # send "processing" status to appsync endpoint
-    send_status_notification(requestId, "Processing...", promptType, "status")
+    send_status_notification(requestId, "Processing...", promptType, "status", identityId)
 
     # send response as streaming data to appsync endpoint
-    messageBody = send_stream_notification(requestId, response, promptType)
+    messageBody = send_stream_notification(requestId, response, promptType, identityId)
 
     return response, messageBody
 
 
-def notify_appsync_endpoint(data):
-    response = call_websocket_endpoint(request_url, data)
+def notify_appsync_endpoint(data, identityId):
+    response = call_websocket_endpoint(request_url, data, identityId)
     return response
 
 
-def send_stream_notification(requestId, response, promptType):
+def send_stream_notification(requestId, response, promptType, identityId):
     index = 0
     messageBody = ""
 
@@ -111,7 +112,7 @@ def send_stream_notification(requestId, response, promptType):
                     "messageChunkIndex": index,
                     "messageType": promptType,
                 }
-                response = notify_appsync_endpoint(notification)
+                response = notify_appsync_endpoint(notification, identityId)
                 logger.info(f"response: {response}")
                 messageBody = messageBody + chunk["delta"]["text"]
                 index = index + 1
@@ -120,14 +121,14 @@ def send_stream_notification(requestId, response, promptType):
     return messageBody
 
 
-def send_status_notification(requestId, messageStatus, messageStatusType, messageType):
+def send_status_notification(requestId, messageStatus, messageStatusType, messageType, identityId):
     notification = {
         "requestId": requestId,
         "messageStatus": messageStatus,
         "messageStatusType": messageStatusType,
         "messageType": messageType,
     }
-    response = notify_appsync_endpoint(notification)
+    response = notify_appsync_endpoint(notification, identityId)
     return response
 
 
@@ -138,6 +139,9 @@ def lambda_handler(event, context):
     bucket = event["detail"]["bucket"]["name"]
     key = event["detail"]["object"]["key"]
 
+    #retrieve identity id (parse first folder of S3 key)
+    identityId = key.split("/")[0]
+
     # retrieve prompt details from the event
     prompt = event["prompt"]
     promptType = event["promptType"]
@@ -146,10 +150,10 @@ def lambda_handler(event, context):
     s3_data = retrieve_s3_object(bucket, key)
 
     # Submit prompt with object data to Bedrock model
-    response, messageBody = invoke_model(prompt, promptType, s3_data)
+    response, messageBody = invoke_model(prompt, promptType, s3_data, identityId)
 
     # status notification (pending)
     requestId = get_request_id(response)
-    send_status_notification(requestId, "Completed", promptType, "status")
+    send_status_notification(requestId, "Completed", promptType, "status", identityId)
 
     return {"statusCode": 200, "body": messageBody}

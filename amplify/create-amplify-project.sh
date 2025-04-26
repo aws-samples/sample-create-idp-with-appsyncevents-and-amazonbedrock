@@ -3,20 +3,17 @@ AMPLIFY_PROJECT="amplify-idp"
 
 # Create Amplify project
 npm create vite@latest $AMPLIFY_PROJECT --yes -- --template react-ts
-npm create amplify@latest --yes
 
 # Create configuration file
 pwd
 (cd $AMPLIFY_FRONTEND_CODE; ./create_custom_configuration.sh)
 
 # Copy frontend code in Amplify project
-cp $AMPLIFY_FRONTEND_CODE/deploy.sh $AMPLIFY_PROJECT/;
-cp $AMPLIFY_FRONTEND_CODE/* $AMPLIFY_PROJECT/;
-cp -r $AMPLIFY_FRONTEND_CODE/src/ $AMPLIFY_PROJECT/;
+cp -rT $AMPLIFY_FRONTEND_CODE/ $AMPLIFY_PROJECT/;
 
 # Build Amplify project
 (cd $AMPLIFY_PROJECT; \
-npm install aws-amplify@6.13.0; \
+npm install aws-amplify; \
 npm add @aws-amplify/ui-react; \
 npm install @aws-amplify/ui-react-storage; \
 npm install @floating-ui/react; \

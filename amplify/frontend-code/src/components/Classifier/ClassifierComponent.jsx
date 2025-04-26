@@ -9,7 +9,7 @@ import { events } from "aws-amplify/data";
 import chatbotIcon from "./chatbot_icon.png";
 import CameraComponent from "./CameraComponent";
 
-import { fetchAuthToken } from "../Utils/Auth";
+import { fetchIdentityId } from "../Utils/Auth";
 import { uploadData } from "aws-amplify/storage";
 import { StorageImage } from "@aws-amplify/ui-react-storage";
 import { Buffer } from "buffer";
@@ -22,7 +22,7 @@ const ClassifierComponent = (props) => {
   const [messages, setMessages] = useState([]);
   const [classificationMessage, setClassificationMessage] = useState([]);
 
-  const [room, setRoom] = useState("channel");
+  const [room, setRoom] = useState();
   const counterRef = useRef(null);
   const [uploadedImage, setUploadedImage] = React.useState();
   const acceptedFileTypes = ["image/png", "image/jpeg"];
@@ -161,8 +161,9 @@ const ClassifierComponent = (props) => {
     var documentData = encodedBlobData;
     console.log("upload document");
     setDocUploadStatus("Uploading...");
+    var identityId = await fetchIdentityId();
     var uploadResponse = await uploadData({
-      path: documentPath,
+      path: `${identityId}/${documentPath}`,
       data: documentData,
       options: {
         bucket: {
@@ -311,11 +312,12 @@ const ClassifierComponent = (props) => {
 
   useEffect(() => {
     const refreshBoard = async () => {
+      var idToken = await fetchIdentityId();
+      setRoom(idToken)
       if (!room || !room.length) {
         return;
       }
-      var authToken = await fetchAuthToken();
-      const pr = events.connect(`/default/${room}`);
+      const pr = events.connect(`/default/channel/${room}`);
       pr.then((channel) => {
         channel.subscribe(
           {
@@ -371,8 +373,7 @@ const ClassifierComponent = (props) => {
               }
             },
             error: (value) => console.error(value),
-          },
-          { authToken: authToken }
+          }
         );
       });
       return () => {

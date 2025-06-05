@@ -39,12 +39,3 @@ execute_script "create-idp-s3-bucket.sh"
 execute_script "create-lambda-s3-bucket.sh"
 
 echo "===== S3 bucket creation scripts have been executed ====="
-
-# Display all created bucket names
-echo ""
-echo "===== Created S3 Buckets ====="
-echo "AMPLIFY_APP_BUCKET_NAME: $AMPLIFY_APP_BUCKET_NAME"
-echo "APPSYNC_AUTH_LAMBDA_BUCKET_NAME: $APPSYNC_AUTH_LAMBDA_BUCKET_NAME"
-echo "BDA_BUCKET_NAME: $BDA_BUCKET_NAME"
-echo "IDP_BUCKET_NAME: $IDP_BUCKET_NAME"
-echo "LAMBDA_BUCKET_NAME: $LAMBDA_BUCKET_NAME"

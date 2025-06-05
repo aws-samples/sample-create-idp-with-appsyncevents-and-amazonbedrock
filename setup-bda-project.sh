@@ -14,13 +14,13 @@ if [ -n "$do_stack_exist" ]; then
   echo "Stack $STACK_NAME already exists. Updating stack..."
   aws cloudformation update-stack \
     --stack-name $STACK_NAME \
-    --template-body file://bda-project-setup.yaml \
+    --template-body file://bda-project-stack.yml \
     --capabilities CAPABILITY_IAM
 else
   echo "Creating new stack $STACK_NAME..."
   aws cloudformation create-stack \
     --stack-name $STACK_NAME \
-    --template-body file://bda-project-setup.yaml \
+    --template-body file://bda-project-stack.yml \
     --capabilities CAPABILITY_IAM
 fi
 

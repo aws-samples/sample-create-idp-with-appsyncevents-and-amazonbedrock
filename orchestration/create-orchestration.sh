@@ -17,7 +17,7 @@ echo "BDA Lambda function packaging complete."
 
 # Step 3: Create the BDA Lambda function
 echo "Step 3: Creating BDA Lambda function..."
-./bda/create-bda-lambda.sh
+(cd bda; ./create-bda-lambda.sh)
 echo "BDA Lambda function creation complete."
 
 # Step 4: Create the state machine

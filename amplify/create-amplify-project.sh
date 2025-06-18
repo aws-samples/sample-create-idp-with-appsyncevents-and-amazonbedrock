@@ -5,11 +5,10 @@ AMPLIFY_PROJECT="amplify-idp"
 npm create vite@latest $AMPLIFY_PROJECT --yes -- --template react-ts
 
 # Create configuration file
-pwd
 (cd $AMPLIFY_FRONTEND_CODE; ./create_custom_configuration.sh)
 
 # Copy frontend code in Amplify project
-cp -rT $AMPLIFY_FRONTEND_CODE/ $AMPLIFY_PROJECT/;
+cp -r $AMPLIFY_FRONTEND_CODE/* $AMPLIFY_PROJECT/;
 
 # Build Amplify project
 (cd $AMPLIFY_PROJECT; \

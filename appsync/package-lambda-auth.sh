@@ -10,6 +10,5 @@ pip install -r requirements.txt -t . --upgrade
 # Zip Lambda project
 zip -r $zip_file_name . -x "*.zip"
 
-# Upload zip file to S3
-aws s3 cp $zip_file_name s3://$APPSYNC_LAMBDA_AUTH_BUCKET_NAME
-
+# Export package name
+export LAMBDA_AUTH_PACKAGE_NAME=$zip_file_name

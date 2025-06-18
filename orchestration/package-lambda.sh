@@ -10,5 +10,5 @@ pip install -r requirements.txt -t .
 # Zip Lambda project
 zip -r $zip_file_name . -x "*.zip"
 
-# Upload zip file to S3
-aws s3 cp $zip_file_name s3://$IDP_LAMBDA_BUCKET_NAME
+# Export package name
+export LAMBDA_PACKAGE_NAME=$zip_file_name

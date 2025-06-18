@@ -23,6 +23,9 @@ APPSYNC_API_URL=$(echo $APPSYNC_API_URL | sed 's/https:\/\///g')
 s3_idp_bucket_stack_name="idp-s3-bucket-stack"
 IDP_BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name "$s3_idp_bucket_stack_name" --query 'Stacks[0].Outputs[?OutputKey==`S3IdpDocBucket`].OutputValue' --output text)
 
+# Upload Lambda zip package in S3 bucket
+aws s3 cp "./lambda/$BDA_LAMBDA_PACKAGE_NAME" s3://$IDP_LAMBDA_BUCKET_NAME
+
 # Retrieve BDA S3 bucket
 aws cloudformation create-stack \
     --stack-name "$bda_eb_notif_stack_name" \

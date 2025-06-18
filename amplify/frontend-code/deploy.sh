@@ -8,6 +8,10 @@ AMPLIFY_PROJECT_PACKAGE="$AMPLIFY_PROJECT.zip"
 s3_amplifyapp_bucket_stack_name="idp-amplifyapp-s3-bucket-stack"
 AMPLIFY_BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name "$s3_amplifyapp_bucket_stack_name" --query 'Stacks[0].Outputs[?OutputKey==`S3AmplifyAppBucket`].OutputValue' --output text)
 
+# Retrieve App Id and branch name
+AMPLIFY_APP_ID=$(aws amplify list-apps --query 'apps[?name==`amplify-idp-app`].appId' | jq -r '.[0]')
+AMPLIFY_BRANCH_NAME="staging"
+
 # Package Amplify app
 npm run build
 

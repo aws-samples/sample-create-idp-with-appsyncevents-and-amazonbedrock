@@ -1,5 +1,4 @@
 #!/bin/bash
-source $HOME/.bashrc
 
 # Retrieve S3 bucket for Lambda zip package
 s3_lambdacode_bucket_stack_name="idp-lambda-s3-bucket-stack"

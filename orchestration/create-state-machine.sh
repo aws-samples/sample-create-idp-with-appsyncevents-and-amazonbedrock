@@ -1,5 +1,4 @@
 #!/bin/bash
-source $HOME/.bashrc
 
 # Retrieve AppSync API URL
 appsync_events_stack_name="idp-appsync-stack"

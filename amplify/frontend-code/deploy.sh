@@ -1,5 +1,4 @@
 #!/bin/bash
-source $HOME/.bashrc
 
 # Define Amplify variables
 AMPLIFY_PROJECT="amplify-idp"

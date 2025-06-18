@@ -1,6 +1,9 @@
 #!/bin/bash
-source $HOME/.bashrc
 bda_eb_notif_stack_name="bda-eb-notif-stack"
+bda_stack_name="bda-project-stack"
+
+# Retrieve BDA project name
+BDA_PROJECT_ARN=$(aws cloudformation describe-stacks --stack-name "$bda_stack_name" --query "Stacks[0].Outputs[?OutputKey=='BDAProjectArn'].OutputValue" --output text)
 
 # Retrieve S3 bucket used to upload documents for BDA processing
 bda_bucket_stack_name="bda-s3-bucket-stack"

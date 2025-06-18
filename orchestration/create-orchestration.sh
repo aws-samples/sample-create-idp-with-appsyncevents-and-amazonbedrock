@@ -7,12 +7,12 @@ echo "Starting deployment process..."
 
 # Step 1: Package the main Lambda function
 echo "Step 1: Packaging main Lambda function..."
-(cd lambda; ../package-lambda.sh)
+cd lambda; source ../package-lambda.sh
 echo "Main Lambda function packaging complete."
 
 # Step 2: Package the BDA Lambda function
 echo "Step 2: Packaging BDA Lambda function..."
-(cd bda/lambda; ../package-bda-lambda.sh)
+cd bda/lambda; source ../package-bda-lambda.sh
 echo "BDA Lambda function packaging complete."
 
 # Step 3: Create the BDA Lambda function

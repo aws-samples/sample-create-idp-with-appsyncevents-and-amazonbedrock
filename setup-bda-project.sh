@@ -43,31 +43,6 @@ BDA_PROJECT_ARN=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --
 BLUEPRINT_ARN=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='BlueprintArn'].OutputValue" --output text)
 BLUEPRINT_STAGE=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='BlueprintStage'].OutputValue" --output text)
 
-# Save environment variables
-echo "Saving environment variables..."
-if grep -q "export BDA_PROJECT_ARN" ~/.bashrc; then
-  # Update existing environment variable
-  sed -i "s|export BDA_PROJECT_ARN=.*|export BDA_PROJECT_ARN=\"$BDA_PROJECT_ARN\"|g" ~/.bashrc
-else
-  # Add new environment variable
-  echo 'export BDA_PROJECT_ARN="'$BDA_PROJECT_ARN'"' >> ~/.bashrc
-fi
-
-if grep -q "export BLUEPRINT_ARN" ~/.bashrc; then
-  sed -i "s|export BLUEPRINT_ARN=.*|export BLUEPRINT_ARN=\"$BLUEPRINT_ARN\"|g" ~/.bashrc
-else
-  echo 'export BLUEPRINT_ARN="'$BLUEPRINT_ARN'"' >> ~/.bashrc
-fi
-
-if grep -q "export BLUEPRINT_STAGE" ~/.bashrc; then
-  sed -i "s|export BLUEPRINT_STAGE=.*|export BLUEPRINT_STAGE=\"$BLUEPRINT_STAGE\"|g" ~/.bashrc
-else
-  echo 'export BLUEPRINT_STAGE="'$BLUEPRINT_STAGE'"' >> ~/.bashrc
-fi
-
-# Apply changes to current shell
-source ~/.bashrc
-
 echo "BDA project created: $BDA_PROJECT_ARN"
 echo "Blueprint ARN: $BLUEPRINT_ARN"
 echo "Blueprint Stage: $BLUEPRINT_STAGE"

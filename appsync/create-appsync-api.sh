@@ -7,7 +7,7 @@ echo "Starting deployment process..."
 
 # Step 1: Package the Lambda authorizer
 echo "Step 1: Packaging Lambda authorizer..."
-(cd lambda-auth; ../package-lambda-auth.sh)
+cd $CURRENT_DIR/appsync/lambda-auth; source ../package-lambda-auth.sh
 if [ $? -ne 0 ]; then
     echo "Error: Failed to package Lambda authorizer. Exiting."
     exit 1
@@ -16,7 +16,7 @@ echo "Lambda authorizer packaged successfully."
 
 # Step 2: Create the AppSync API
 echo "Step 2: Creating AppSync API..."
-./create-appsync.sh
+cd $CURRENT_DIR/appsync/; ./create-appsync.sh
 if [ $? -ne 0 ]; then
     echo "Error: Failed to create AppSync API. Exiting."
     exit 1

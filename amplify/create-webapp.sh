@@ -1,5 +1,19 @@
 #!/bin/bash
 
+# if region not provided as an argument, attempt to set the region
+region="$1"
+if [ -z "$region" ]; then
+    region=$(aws configure list | grep region | awk '{print $2}')
+fi
+
+# if not able to set the region, exit
+if [ -z "$region" ]; then
+    echo "Please provide the AWS region as an argument."
+    echo "Format: ./create-webapp.sh <region>"
+    echo "Example: ./create-webapp.sh us-east-1"
+    exit 1
+fi
+
 # Script to run Amplify setup scripts sequentially
 echo "Starting Amplify setup process..."
 
@@ -16,7 +30,7 @@ fi
 
 # Run the first script
 echo "Running create-amplify-project.sh..."
-./create-amplify-project.sh
+./create-amplify-project.sh "$region"
 if [ $? -ne 0 ]; then
     echo "Error: create-amplify-project.sh failed"
     exit 1

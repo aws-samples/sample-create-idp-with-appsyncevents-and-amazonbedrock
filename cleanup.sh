@@ -47,4 +47,10 @@ aws cloudformation delete-stack --stack-name appsync-lambda-auth-s3-bucket-stack
 aws cloudformation delete-stack --stack-name idp-lambda-s3-bucket-stack --region $aws_region
 aws cloudformation delete-stack --stack-name idp-s3-bucket-stack --region $aws_region
 
+aws cloudformation wait stack-delete-complete --stack-name idp-amplifyapp-s3-bucket-stack --region $aws_region
+aws cloudformation wait stack-delete-complete --stack-name bda-s3-bucket-stack --region $aws_region
+aws cloudformation wait stack-delete-complete --stack-name appsync-lambda-auth-s3-bucket-stack --region $aws_region
+aws cloudformation wait stack-delete-complete --stack-name idp-lambda-s3-bucket-stack --region $aws_region
+aws cloudformation wait stack-delete-complete --stack-name idp-s3-bucket-stack --region $aws_region
+
 echo "Deletion completed for the stacks with the S3 buckets"

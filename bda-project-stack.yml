@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'CloudFormation template to create Bedrock Data Automation project with driving license blueprint'
-Properties:
+Parameters:
   BlueprintNamePrefix:
     Type: String
     Description: Prefix of the blueprint name
@@ -16,7 +16,7 @@ Resources:
       BlueprintName: !Sub
         - "${blueprintprefix}-${stackid}"
         - blueprintprefix: !Ref "BlueprintNamePrefix"
-          stackid: !Select ["3", !Split ["/", !Ref "AWS::StackId"]]
+          stackid: !Select ["2", !Split ["/", !Ref "AWS::StackId"]]
       Type: DOCUMENT
       Schema:
         $schema: "http://json-schema.org/draft-07/schema#"
@@ -89,7 +89,7 @@ Resources:
       ProjectName: !Sub
         - "${projectprefix}-${stackid}"
         - projectprefix: !Ref "BdaProjectNamePrefix"
-          stackid: !Select ["3", !Split ["/", !Ref "AWS::StackId"]]
+          stackid: !Select ["2", !Split ["/", !Ref "AWS::StackId"]]
       StandardOutputConfiguration:
         Document:
           Extraction:

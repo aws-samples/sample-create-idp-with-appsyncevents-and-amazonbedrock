@@ -9,6 +9,8 @@ fi
 # if not able to set the region, exit
 if [ -z "$region" ]; then
     echo "Please provide the AWS region as an argument."
+    echo "Format: ./create-webapp.sh <region>"
+    echo "Example: ./create-webapp.sh us-east-1"
     exit 1
 fi
 

@@ -12,7 +12,7 @@ userPoolClientId=$(aws cloudformation describe-stacks --stack-name "$userPoolSta
 appSyncEndpoint=$(aws cloudformation describe-stacks --stack-name "$appSyncStackName" --output 'text' --query 'Stacks[0].Outputs[?OutputKey==`AppSyncEventsApiHttpUrl`].OutputValue')
 appSyncHttpEndpoint="https://$appSyncEndpoint/event"
 appSyncAuthMode="userPool"
-region="$AWS_REGION"
+region="$1"
 uploadDocumentBucket=$(aws cloudformation describe-stacks --stack-name "$documentBucketStackName" --output 'text' --query 'Stacks[0].Outputs[?OutputKey==`S3IdpDocBucket`].OutputValue')
 
 echo "{ \

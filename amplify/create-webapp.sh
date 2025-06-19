@@ -3,7 +3,7 @@
 # if region not provided as an argument, attempt to set the region
 region="$1"
 if [ -z "$region" ]; then
-    region=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
+    region=$(aws configure list | grep region | awk '{print $2}')
 fi
 
 # if not able to set the region, exit

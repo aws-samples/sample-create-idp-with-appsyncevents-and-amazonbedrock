@@ -1,17 +1,15 @@
-# if region not provided as an argument, exit
-region = $1
+# if region not provided as an argument, attempt to set the region
+region=$1
 if [ -z "$region" ]; then
-    # Attempt to set the region
-    region = $(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
+    region=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
 fi
 
-# if region not provided as an argument, exit
+# if not able to set the region, exit
 if [ -z "$region" ]; then
     echo "Please provide the AWS region as an argument."
     exit 1
 fi
 
-aws_region=$1
 AMPLIFY_FRONTEND_CODE="frontend-code"
 AMPLIFY_PROJECT="amplify-idp"
 

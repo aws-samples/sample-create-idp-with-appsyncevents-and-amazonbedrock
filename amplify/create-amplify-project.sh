@@ -17,5 +17,6 @@ npm add @aws-amplify/ui-react; \
 npm install @aws-amplify/ui-react-storage; \
 npm install @floating-ui/react; \
 npm install react-cropper; \
+npm install react-json-view; \
 npm run build; \
 )

@@ -1,11 +1,9 @@
 import { Button, useTheme } from "@aws-amplify/ui-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useFloating } from "@floating-ui/react";
-import { uploadData } from "aws-amplify/storage";
 
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import { Buffer } from "buffer";
 
 const CameraComponent = (props) => {
   const { tokens } = useTheme();
@@ -23,6 +21,16 @@ const CameraComponent = (props) => {
     placement: "right-start",
     strategy: "absolute",
   });
+
+  // Start webcam automatically when component mounts
+  useEffect(() => {
+    startWebcam();
+    
+    // Cleanup function to stop webcam when component unmounts
+    return () => {
+      stopWebcam();
+    };
+  }, []);
 
   const onCrop = () => {
     const cropper = cropperRef.current?.cropper;
@@ -55,13 +63,29 @@ const CameraComponent = (props) => {
 
     try {
       setVideoStarting(true);
-      navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-        videoRef.current.srcObject = stream;
-        setMediaStream(stream);
-        setVideoOn(true);
-      });
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      // Set video on after we have the stream
+      setVideoOn(true);
+      setMediaStream(stream);
+      
+      // Use setTimeout to ensure the video element is rendered after state update
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          setVideoStarting(false);
+        } else {
+          console.error("Video element not found after render");
+          setVideoStarting(false);
+          setVideoOn(false);
+        }
+      }, 200);
+      
     } catch (error) {
       console.error("Error accessing webcam", error);
+      setVideoStarting(false);
+      setVideoOn(false);
     }
   };
 
@@ -89,6 +113,11 @@ const CameraComponent = (props) => {
     setCroppedImage(null);
     props.setCameraImage(null);
   };
+
+  const closeWebcam = () => {
+    props.setShowCamera(false);
+    stopWebcam()
+  }
 
   const stopWebcam = () => {
     setVideoStarting(false);
@@ -124,68 +153,50 @@ const CameraComponent = (props) => {
 
   return (
     <>
-      <div>
-        <b>Upload Document</b>
-      </div>
-      <div className="classifierImageFormArea">
-        <button
-          type="button"
-          ref={refs.setReference}
-          onClick={startWebcam}
-          className="cameraButton"
-        />
-      </div>
-      <>
-        {imageOn || videoOn || videoStarting ? (
-          <div
-            id="cameraCanvas"
-            ref={refs.setFloating}
-            style={floatingStyles}
-            className="cameraCanvasArea"
-            aspectRatio={"cover"}
-          >
+      {imageOn || videoOn || videoStarting ? (
+        <div
+          id="cameraCanvas"
+          className="cameraCanvasArea"
+          aspectRatio={"cover"}
+        >
             <>
               <>
                 {imageOn && !videoOn ? (
                   <>
-                    <Cropper
-                      style={{ height: "75%", width: "75%" }}
-                      guides={false}
-                      src={capturedImage}
-                      crop={onCrop}
-                      ref={cropperRef}
-                    />
+                    <div className="cropper-wrapper">
+                      <Cropper
+                        style={{ height: "100%", width: "100%" }}
+                        guides={false}
+                        src={capturedImage}
+                        crop={onCrop}
+                        ref={cropperRef}
+                      />
+                    </div>
                     <div
                       id="cameraBtnListCanvas"
                       className="cameraBtnListCanvasArea"
                     >
-                      <Button
-                        color="white"
-                        borderColor={"purple"}
-                        backgroundColor={"purple"}
+                      <button
+                        className="modern-camera-btn primary-btn"
                         onClick={uploadPicture}
-                        size="small"
                       >
-                        Upload
-                      </Button>
-                      <Button
-                        color="white"
-                        borderColor={"purple"}
-                        backgroundColor={"purple"}
+                        <span className="btn-icon">📤</span>
+                        <span className="btn-text">Upload</span>
+                      </button>
+                      <button
+                        className="modern-camera-btn secondary-btn"
                         onClick={startWebcam}
-                        size="small"
                       >
-                        Recapture
-                      </Button>
-                      <Button
-                        color="white"
-                        borderColor={"purple"}
-                        backgroundColor={"purple"}
-                        onClick={resetState}
-                        size="small"
+                        <span className="btn-icon">🔄</span>
+                        <span className="btn-text">Recapture</span>
+                      </button>
+                      <button
+                        className="modern-camera-btn danger-btn"
+                        onClick={closeWebcam}
                       >
-                        Close
-                      </Button>
+                        <span className="btn-icon">✕</span>
+                        <span className="btn-text">Close</span>
+                      </button>
                     </div>
                   </>
                 ) : (
@@ -204,24 +215,20 @@ const CameraComponent = (props) => {
                   id="cameraBtnListCanvas"
                   className="cameraBtnListCanvasArea"
                 >
-                  <Button
-                    color="white"
-                    borderColor={"purple"}
-                    backgroundColor={"purple"}
+                  <button
+                    className="modern-camera-btn primary-btn"
                     onClick={captureImage}
-                    size="small"
                   >
-                    Capture Image
-                  </Button>
-                  <Button
-                    color="white"
-                    borderColor={"purple"}
-                    backgroundColor={"purple"}
-                    onClick={resetState}
-                    size="small"
+                    <span className="btn-icon">📸</span>
+                    <span className="btn-text">Capture Image</span>
+                  </button>
+                  <button
+                    className="modern-camera-btn danger-btn"
+                    onClick={closeWebcam}
                   >
-                    Close
-                  </Button>
+                    <span className="btn-icon">✕</span>
+                    <span className="btn-text">Close</span>
+                  </button>
                 </div>
               ) : (
                 <></>
@@ -232,7 +239,6 @@ const CameraComponent = (props) => {
         ) : (
           <></>
         )}
-      </>
     </>
   );
 };

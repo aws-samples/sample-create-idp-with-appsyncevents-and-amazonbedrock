@@ -2,7 +2,7 @@ import { fetchAuthSession } from "@aws-amplify/auth";
 
 export async function fetchSession() {
   const session = await fetchAuthSession({ forceRefresh: true });
-  console.log(`session: ${JSON.stringify(session)}`)
+  console.debug(`session: ${JSON.stringify(session)}`)
   return session;
 }
 

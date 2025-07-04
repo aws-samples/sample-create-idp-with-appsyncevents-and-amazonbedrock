@@ -72,6 +72,7 @@ const ChatInterface = ({ customconfig }) => {
   const [docClassificationStatus, setDocClassificationStatus] = useState("-");
   const [uploadedImage, setUploadedImage] = useState("");
   const [uploadedFileName, setUploadedFileName] = useState("");
+  const [cameraImage, setCameraImage] = useState();
 
   const initialAssistantMessage = 
     "Please upload your file. Once done, I will share my analysis here.";

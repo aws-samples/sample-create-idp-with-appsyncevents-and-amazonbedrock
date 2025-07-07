@@ -164,34 +164,6 @@ Image {
   margin-right: auto;
 }
 
-.fileAttachmentButton {
-  background-color: #a97df9;
-  background-image: url('./components/Classifier/fileattach_icon.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 52%;
-  border-radius: 1px;
-  height: 40px;
-  width: 40px;
-  margin-left: 0px;
-  margin-right: 0px;
-  max-width: 40px;
-}
-
-.cameraButton {
-  background-color: #a97df9;
-  background-image: url('./components/Classifier/camera_icon.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100%;
-  border-radius: 1px;
-  height: 40px;
-  width: 40px;
-  margin-left: 0px;
-  margin-right: 0px;
-  max-width: 40px;
-}
-
 .chatbotImageInputArea {
   height: 50px;
   width: 50px;

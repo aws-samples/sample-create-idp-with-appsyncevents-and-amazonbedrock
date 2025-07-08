@@ -19,7 +19,6 @@ To follow along and set up this solution, you must have the following:
     * [Latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions)
 * Enable [Model Access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) to the Claude 3 Sonnet model in Amazon Bedrock
 
-
 **Deployment steps**
 
 Complete the following steps to provision the solution:
@@ -27,23 +26,19 @@ Complete the following steps to provision the solution:
 **Step 1**: Grant execution permissions for shell script files
 
 ```bash
-echo "Enable execution on shell script files"
-find . -name '*.sh' -exec chmod +x {} +
+chmod +x ./init-env.sh && source ./init-env.sh
 ```
 
 **Step 2**: Setup Bedrock Data Automation project & sample blueprint
 
 ```bash
-(./setup-bda-project.sh)
+./setup-bda-project.sh
 ```
 
-**Step 3**: Create S3 buckets to upload IdP documents and code files of Lambda functions
+**Step 3**: Create S3 buckets used in this solution
 
 ```bash
-export CURRENT_DIR=$(pwd)
-(cd $CURRENT_DIR/s3; ./create-idp-s3-bucket.sh)
-(cd $CURRENT_DIR/s3; ./create-lambda-s3-bucket.sh)
-(cd $CURRENT_DIR/s3; ./create-appsync-authlambda-s3-bucket.sh)
+cd $CURRENT_DIR/s3; ./create-s3-buckets.sh
 ```
 
 **Step 4**: Create Cognito user pool & identity pool (set the **EMAIL_ARG** variable to your email address)
@@ -51,56 +46,34 @@ export CURRENT_DIR=$(pwd)
 ```bash
 # TODO: Set the EMAIL_ARG variable to your email address 
 EMAIL_ARG="#replace-with-your-email-address#"
-(cd $CURRENT_DIR/cognito; ./create-cognito-userpool.sh)
+cd $CURRENT_DIR/cognito; ./create-cognito-userpool.sh)
 (cd $CURRENT_DIR/cognito; ./create-cognito-testuser.sh $EMAIL_ARG)
 ```
 
 **Important note:** This step will also create a user in your user pool, you should receive an email with a temporary password in this format: "Your username is **#your-email-address#** and temporary password is **#temporary-password#**.". Keep note of your login details (email address and temporary password) as this will be used later when testing the web application.
 
-**Step 5**: Package Lambda Authorizer function code
+**Step 5**: Create AppSync Events API
 
 ```bash
-(cd $CURRENT_DIR/appsync/lambda-auth; ../package-lambda-auth.sh)
+cd $CURRENT_DIR/appsync/; ./create-appsync-api.sh
 ```
 
-**Step 6**: Create AppSync Events API
+**Step 6**: Create the AWS Step Functions state machine (including AWS Lambda functions) by running the following scripts:
 
 ```bash
-(cd $CURRENT_DIR/appsync/; ./create-appsync.sh)
+cd $CURRENT_DIR/orchestration/; ./create-orchestration.sh
 ```
 
-**Step 7**: Package Lambda functions (functions used in Step Functions state machine and function used for Bedrock Data Automation)
+**Step 7**: Create the web application with AWS Amplify
 
 ```bash
-(cd $CURRENT_DIR/orchestration/lambda; ../package-lambda.sh)
-(cd $CURRENT_DIR/orchestration/bda/lambda; ../package-bda-lambda.sh)
+cd $CURRENT_DIR/amplify/; ./create-webapp.sh
 ```
 
-**Step 8**: Create Bedrock Data Automation's S3 bucket
+**Step 8**: Deploy the web application
 
 ```bash
-(cd $CURRENT_DIR/s3; ./create-bda-s3-bucket.sh)
-```
-
-**Step 9**: Create Step Functions state machine and Lambda functions
-
-```bash
-(cd $CURRENT_DIR/orchestration/bda; ./create-bda-lambda.sh $BDA_BUCKET_NAME)
-(cd $CURRENT_DIR/orchestration/; ./create-state-machine.sh)
-```
-
-**Step 10**: Setup Amplify to deploy the web application
-
-```bash
-(cd $CURRENT_DIR/amplify/; ./create-amplify-project.sh)
-(cd $CURRENT_DIR/amplify/; ./create-amplify-app.sh)
-(cd $CURRENT_DIR/s3; ./create-amplifyapp-s3-bucket.sh)
-```
-
-**Step 11**: Deploy the web application
-
-```bash
-(cd $CURRENT_DIR/amplify/amplify-idp; ./deploy.sh)
+cd $CURRENT_DIR/amplify/amplify-idp; ./deploy.sh
 ```
 
 Once the solution is deployed:

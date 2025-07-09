@@ -218,8 +218,7 @@ const ChatInterface = ({ customconfig }) => {
                   }
                   
                   console.log(`bdaMessage: ${JSON.stringify(bdaMessage)}`);
-                  var docClassificationMessageChunk =
-                    bdaMessage.document_class.type;
+                  var docClassificationMessageChunk = bdaMessage.document_class?.type || bdaMessage.matched_blueprint?.name;
                   var docClassificationMessageChunkIndex = 0;
                   var docClassificationMessageChunkObject = {
                     index: docClassificationMessageChunkIndex,

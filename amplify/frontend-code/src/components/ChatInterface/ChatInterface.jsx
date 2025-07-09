@@ -218,7 +218,7 @@ const ChatInterface = ({ customconfig }) => {
                   }
                   
                   console.log(`bdaMessage: ${JSON.stringify(bdaMessage)}`);
-                  var docClassificationMessageChunk = "DOCUMENT"
+                  var docClassificationMessageChunk = "DOCUMENT";
                   var docClassificationMessageChunkIndex = 0;
                   var docClassificationMessageChunkObject = {
                     index: docClassificationMessageChunkIndex,
